@@ -3,94 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLGS Content Hub - Ultra Pro</title>
+    <title>MLGS Content Hub - Pro Editor</title>
     <style>
         :root {
             --pro-blue: #0056b3;
             --pro-blue-hover: #004494;
             --pro-green: #28a745;
             --pro-green-hover: #218838;
-            --bg-page: #f4f7f9;
-            --border: #ced4da;
-            /* Syntax Highlighting Colors (Notepad++ Style) */
+            --bg-light: #f8f9fa;
+            --border-color: #ced4da;
+            /* Syntax Highlighting Colors */
             --syn-tag: #0000ff;
             --syn-attr: #ff0000;
             --syn-val: #8000ff;
             --syn-str: #808080;
-            --syn-comm: #008000;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg-page);
+            background-color: var(--bg-light);
             margin: 0;
-            padding: 20px; /* Requested 20px+ padding */
+            padding: 25px; /* Padding around layout */
+            color: #333;
         }
 
-        .main-container {
-            max-width: 1600px;
+        .hub-container {
+            max-width: 1500px;
             margin: 0 auto;
             background: #fff;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
             border: 1px solid #ddd;
         }
 
-        /* Top Header Area */
+        /* Header Area */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
             border-bottom: 4px solid var(--pro-blue);
-            padding-bottom: 15px;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        .brand-section h1 {
+        .header-left h1 {
             margin: 0;
             color: var(--pro-blue);
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 900;
-            letter-spacing: -1px;
+            text-transform: uppercase;
         }
 
-        .save-status-large {
-            font-size: 24px;
-            font-weight: 900;
+        #timestamp-display {
+            font-size: 24px; /* Larger text */
+            font-weight: 800;
+            color: #d9534f;
+            background: #fff5f5;
             padding: 10px 20px;
             border-radius: 8px;
-            background: #fff0f0;
-            color: #d9534f;
             border: 2px solid #f5c6cb;
-            transition: all 0.3s;
         }
 
-        .save-status-large.active {
-            background: #eafff0;
+        #timestamp-display.saved {
             color: var(--pro-green);
+            background: #f0fff4;
             border-color: #c3e6cb;
         }
 
-        /* Subject Box */
-        .subject-container {
+        /* Subject Line */
+        .subject-box {
             margin-bottom: 25px;
+        }
+
+        .subject-box label {
+            display: block;
+            font-weight: bold;
+            color: var(--pro-blue);
+            margin-bottom: 8px;
+            font-size: 18px;
         }
 
         #email-title {
             width: 100%;
             padding: 15px;
             font-size: 20px;
-            border: 2px solid var(--border);
+            border: 2px solid var(--border-color);
             border-radius: 6px;
-            outline-color: var(--pro-blue);
-            font-weight: bold;
+            box-sizing: border-box;
+            outline: none;
         }
 
-        /* Workspace Layout: Left (Code) | Right (Visual) */
+        /* The Workspace */
         .workspace {
             display: flex;
-            gap: 20px;
+            gap: 25px;
             height: 650px;
             margin-bottom: 25px;
         }
@@ -99,27 +106,28 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            border: 2px solid var(--border);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             background: #fff;
             overflow: hidden;
             position: relative;
         }
 
-        .pane-title {
+        .pane-header {
             background: var(--pro-blue);
             color: white;
             padding: 10px 15px;
             font-weight: bold;
             font-size: 14px;
             text-transform: uppercase;
+            display: flex;
+            justify-content: space-between;
         }
 
-        /* HTML Editor Styles (Notepad++ Mimic) */
-        .code-container {
+        /* Notepad++ Style Editor (Left) */
+        .editor-container {
             position: relative;
             flex: 1;
-            background: #ffffff;
             overflow: hidden;
         }
 
@@ -127,12 +135,12 @@
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             margin: 0; padding: 15px;
-            box-sizing: border-box;
             font-family: 'Consolas', 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.5;
             white-space: pre-wrap;
             word-wrap: break-word;
+            box-sizing: border-box;
             border: none;
             overflow-y: auto;
         }
@@ -140,7 +148,7 @@
         #html-input {
             color: transparent;
             background: transparent;
-            caret-color: black;
+            caret-color: #000;
             z-index: 2;
             resize: none;
             outline: none;
@@ -152,16 +160,16 @@
             pointer-events: none;
         }
 
-        /* Syntax colors */
+        /* Syntax Color Tokens */
         .token-tag { color: var(--syn-tag); font-weight: bold; }
         .token-attr { color: var(--syn-attr); }
         .token-val { color: var(--syn-val); }
-        .token-comm { color: var(--syn-comm); font-style: italic; }
+        .token-token { color: #d63384; font-weight: bold; background: #fff0f5; }
 
-        /* Visual Editor Styles */
-        .wysiwyg-toolbar {
+        /* WYSIWYG Visual Editor (Right) */
+        .toolbar {
             background: #f8f9fa;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid var(--border-color);
             padding: 8px;
             display: flex;
             gap: 5px;
@@ -169,21 +177,17 @@
             align-items: center;
         }
 
-        .wysiwyg-toolbar button, .wysiwyg-toolbar select {
-            padding: 5px 8px;
+        .toolbar button, .toolbar select {
+            padding: 5px 10px;
             border: 1px solid #ccc;
             background: #fff;
             cursor: pointer;
-            border-radius: 3px;
             font-weight: bold;
+            border-radius: 4px;
         }
 
-        .wysiwyg-toolbar input[type="color"] {
-            border: none;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
-            background: none;
+        .toolbar input[type="color"] {
+            width: 35px; height: 35px; border: none; cursor: pointer; background: none;
         }
 
         #visual-editor {
@@ -191,122 +195,119 @@
             padding: 20px;
             overflow-y: auto;
             outline: none;
-            background: #fff;
+            background: white;
         }
 
-        /* Action Buttons */
-        .footer-actions {
+        /* Bottom Controls */
+        .action-bar {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
+            margin-bottom: 30px;
         }
 
         .btn {
-            padding: 15px;
+            padding: 18px;
             font-size: 16px;
             font-weight: bold;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             text-transform: uppercase;
             transition: 0.2s;
+            text-align: center;
+            text-decoration: none;
         }
+
+        .btn-green { background: var(--pro-green); color: white; }
+        .btn-green:hover { background: var(--pro-green-hover); }
 
         .btn-blue { background: var(--pro-blue); color: white; }
         .btn-blue:hover { background: var(--pro-blue-hover); }
-        .btn-green { background: var(--pro-green); color: white; }
-        .btn-green:hover { background: var(--pro-green-hover); }
+
         .btn-grey { background: #6c757d; color: white; }
 
-        /* Bottom Login */
-        .mlgs-footer {
-            margin-top: 30px;
+        .footer-login {
             text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+            border-top: 2px solid #eee;
+            padding-top: 30px;
         }
 
         .btn-mlgs {
             display: inline-block;
-            padding: 20px 60px;
+            width: 100%;
+            max-width: 500px;
             background: var(--pro-green);
             color: white;
-            text-decoration: none;
+            padding: 22px;
+            font-size: 24px;
             font-weight: 900;
-            font-size: 22px;
-            border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(40,167,69,0.4);
+            border-radius: 10px;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(40,167,69,0.3);
         }
     </style>
 </head>
 <body>
 
-<div class="main-container">
+<div class="hub-container">
     <header>
-        <div class="brand-section">
-            <h1>MLGS CONTENT HUB</h1>
+        <div class="header-left">
+            <h1>MLGS Content Hub</h1>
         </div>
-        <div id="save-status" class="save-status-large">
-            LAST SAVED: NEVER
-        </div>
+        <div id="timestamp-display">LAST SENT/SAVED: NEVER</div>
     </header>
 
-    <div class="subject-container">
-        <input type="text" id="email-title" placeholder="Enter Subject Line / File Title..." oninput="autoSaveToBrowser()">
+    <div class="subject-box">
+        <label>Subject Line / Title</label>
+        <input type="text" id="email-title" placeholder="Enter Subject Line..." oninput="autoSave()">
     </div>
 
     <div class="workspace">
-        <!-- LEFT: HTML SOURCE (Syntax Highlighted) -->
+        <!-- LEFT: NOTEPAD++ STYLE CODE EDITOR -->
         <div class="pane">
-            <div class="pane-title">HTML Code (Notepad++ Style)</div>
-            <div class="code-container">
+            <div class="pane-header">HTML Code (Copy for MLGS)</div>
+            <div class="editor-container">
                 <div id="html-highlight"></div>
-                <textarea id="html-input" spellcheck="false" oninput="updateFromCode()" onscroll="syncScroll()"></textarea>
+                <textarea id="html-input" spellcheck="false" oninput="syncFromCode()" onscroll="syncScroll()"></textarea>
             </div>
         </div>
 
-        <!-- RIGHT: VISUAL EDITOR -->
+        <!-- RIGHT: VISUAL WYSIWYG EDITOR -->
         <div class="pane">
-            <div class="pane-title">Visual Editor (What You See Is What You Get)</div>
-            <div class="wysiwyg-toolbar">
-                <button onclick="cmd('bold')">B</button>
-                <button onclick="cmd('italic')">I</button>
-                <button onclick="cmd('underline')">U</button>
-                <select onchange="cmd('formatBlock', this.value); this.selectedIndex=0;">
-                    <option value="">Style</option>
-                    <option value="H1">Heading 1</option>
-                    <option value="H2">Heading 2</option>
-                    <option value="P">Paragraph</option>
-                </select>
-                <select onchange="cmd('fontSize', this.value); this.selectedIndex=0;">
+            <div class="pane-header">Visual Preview / Editor</div>
+            <div class="toolbar">
+                <button onclick="exec('bold')">B</button>
+                <button onclick="exec('italic')">I</button>
+                <button onclick="exec('underline')">U</button>
+                <select onchange="exec('fontSize', this.value); this.selectedIndex=0;">
                     <option value="">Size</option>
-                    <option value="1">Small</option>
-                    <option value="3">Normal</option>
+                    <option value="3">Small</option>
+                    <option value="4">Normal</option>
                     <option value="5">Large</option>
-                    <option value="7">Huge</option>
+                    <option value="7">Extra Large</option>
                 </select>
-                <label style="font-size: 11px; margin-left: 5px;">Text Color:</label>
-                <input type="color" oninput="cmd('foreColor', this.value)">
-                <button onclick="cmd('createLink', prompt('URL:'))">Link</button>
-                <button onclick="cmd('insertUnorderedList')">• List</button>
-                <button onclick="cmd('justifyLeft')">L</button>
-                <button onclick="cmd('justifyCenter')">C</button>
-                <button onclick="cmd('removeFormat')">CLR</button>
+                <input type="color" oninput="exec('foreColor', this.value)" title="Text Color">
+                <button onclick="exec('createLink', prompt('Link URL:'))">Link</button>
+                <button onclick="exec('insertImage', prompt('Image URL:'))">Img</button>
+                <button onclick="exec('justifyLeft')">L</button>
+                <button onclick="exec('justifyCenter')">C</button>
+                <button onclick="exec('removeFormat')">Clear</button>
             </div>
-            <div id="visual-editor" contenteditable="true" oninput="updateFromVisual()"></div>
+            <div id="visual-editor" contenteditable="true" oninput="syncFromVisual()"></div>
         </div>
     </div>
 
-    <div class="footer-actions">
-        <button class="btn btn-green" onclick="downloadFile()">Download HTML File</button>
+    <div class="action-bar">
+        <button class="btn btn-green" onclick="downloadFile()">Save & Download</button>
         <button class="btn btn-blue" onclick="manualSave()">Save to Browser</button>
-        <button class="btn btn-blue" onclick="document.getElementById('file-loader').click()">Load File from PC</button>
-        <button class="btn btn-grey" onclick="copyCode()">Copy HTML Code</button>
+        <button class="btn btn-blue" onclick="document.getElementById('file-loader').click()">Load from PC</button>
+        <button class="btn btn-grey" onclick="copyHTML()">Copy HTML Code</button>
     </div>
 
     <input type="file" id="file-loader" style="display:none" accept=".html">
 
-    <div class="mlgs-footer">
+    <div class="footer-login">
         <a href="https://www.myleadgenserect.com/login" target="_blank" class="btn-mlgs">OPEN MLGS LOGIN</a>
     </div>
 </div>
@@ -316,44 +317,42 @@
     const htmlHighlight = document.getElementById('html-highlight');
     const visualEditor = document.getElementById('visual-editor');
     const emailTitle = document.getElementById('email-title');
-    const saveStatus = document.getElementById('save-status');
+    const timeDisplay = document.getElementById('timestamp-display');
     const fileLoader = document.getElementById('file-loader');
 
-    // 1. Core Logic: Syntax Highlighting Engine
+    // 1. Syntax Highlighting Engine (Notepad++ Style)
     function applyHighlighting(code) {
-        // Simple Regex for HTML tags, attributes, and strings
         let escaped = code
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
 
-        // Highlight tags
+        // Highlight Tags
         escaped = escaped.replace(/&lt;(\/?[a-z1-6]+)(.*?)&gt;/gi, (match, tag, attrs) => {
-            // Highlight attributes inside the tag
             let highlightedAttrs = attrs.replace(/([a-z-]+)=(['"].*?['"])/gi, 
                 '<span class="token-attr">$1</span>=<span class="token-val">$2</span>');
             return `<span class="token-tag">&lt;${tag}</span>${highlightedAttrs}<span class="token-tag">&gt;</span>`;
         });
 
-        // Highlight comments
-        escaped = escaped.replace(/&lt;!--([\s\S]*?)--&gt;/g, '<span class="token-comm">&lt;!--$1--&gt;</span>');
+        // Highlight MLGS Tokens {!token}
+        escaped = escaped.replace(/\{!(.*?)\}/g, '<span class="token-token">{!$1}</span>');
 
         htmlHighlight.innerHTML = escaped + "\n";
     }
 
-    // 2. Sync Logic
-    function updateFromCode() {
+    // 2. Synchronization Logic
+    function syncFromCode() {
         const code = htmlInput.value;
         applyHighlighting(code);
-        visualEditor.innerHTML = code;
-        autoSaveToBrowser();
+        visualEditor.innerHTML = code; // The visual editor displays what is in the code
+        autoSave();
     }
 
-    function updateFromVisual() {
+    function syncFromVisual() {
         const code = visualEditor.innerHTML;
-        htmlInput.value = code;
+        htmlInput.value = code; // The code editor shows resulting HTML
         applyHighlighting(code);
-        autoSaveToBrowser();
+        autoSave();
     }
 
     function syncScroll() {
@@ -361,37 +360,44 @@
     }
 
     // 3. WYSIWYG Commands
-    function cmd(command, value = null) {
+    function exec(command, value = null) {
         document.execCommand(command, false, value);
-        updateFromVisual();
+        syncFromVisual();
     }
 
-    // 4. Persistence (Browser Storage)
-    function autoSaveToBrowser() {
+    // 4. Persistence Logic (Browser & PC)
+    function autoSave() {
         const data = {
             title: emailTitle.value,
-            html: htmlInput.value
+            html: htmlInput.value,
+            time: localStorage.getItem('mlgs_last_time') || "NEVER"
         };
-        localStorage.setItem('mlgs_pro_cache', JSON.stringify(data));
+        localStorage.setItem('mlgs_data', JSON.stringify(data));
     }
 
     function manualSave() {
-        autoSaveToBrowser();
-        const now = new Date().toLocaleTimeString();
-        localStorage.setItem('mlgs_pro_time', now);
-        saveStatus.innerText = `LAST SAVED: ${now}`;
-        saveStatus.classList.add('active');
-        alert("Work saved successfully to your browser.");
+        const now = new Date().toLocaleString();
+        localStorage.setItem('mlgs_last_time', now);
+        updateTimeUI(now);
+        autoSave();
+        alert("Content saved to browser session.");
     }
 
-    // 5. File Operations
+    function updateTimeUI(time) {
+        timeDisplay.innerText = `LAST SENT/SAVED: ${time}`;
+        timeDisplay.classList.add('saved');
+    }
+
     function downloadFile() {
-        const blob = new Blob([htmlInput.value], { type: 'text/html' });
+        const code = htmlInput.value;
+        const blob = new Blob([code], { type: 'text/html' });
         const a = document.createElement('a');
-        const filename = (emailTitle.value || 'mlgs-template') + '.html';
+        const filename = (emailTitle.value || 'mlgs-email') + '.html';
+        
         a.href = URL.createObjectURL(blob);
         a.download = filename;
         a.click();
+        
         manualSave();
     }
 
@@ -399,32 +405,28 @@
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onload = (event) => {
-            const content = event.target.result;
-            htmlInput.value = content;
+            htmlInput.value = event.target.result;
             emailTitle.value = file.name.replace('.html', '');
-            updateFromCode();
+            syncFromCode();
         };
         reader.readAsText(file);
     };
 
-    function copyCode() {
-        navigator.clipboard.writeText(htmlInput.value);
-        alert("HTML code copied to clipboard!");
+    function copyHTML() {
+        htmlInput.select();
+        document.execCommand('copy');
+        alert("HTML Code copied! You can now paste this into the MLGS 'Source' box.");
     }
 
-    // 6. Initialization
+    // 5. Initialize on Load
     window.onload = () => {
-        const cache = localStorage.getItem('mlgs_pro_cache');
-        const lastTime = localStorage.getItem('mlgs_pro_time');
-        if (cache) {
-            const data = JSON.parse(cache);
+        const saved = localStorage.getItem('mlgs_data');
+        if (saved) {
+            const data = JSON.parse(saved);
             emailTitle.value = data.title || "";
             htmlInput.value = data.html || "";
-            updateFromCode();
-        }
-        if (lastTime) {
-            saveStatus.innerText = `LAST SAVED: ${lastTime}`;
-            saveStatus.classList.add('active');
+            syncFromCode();
+            if (data.time !== "NEVER") updateTimeUI(data.time);
         }
     };
 </script>
