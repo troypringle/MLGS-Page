@@ -2,166 +2,123 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>MLGS IDE - Split View</title>
+    <title>MLGS Source Mirror</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1e1e1e;
-            color: #d4d4d4;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #252526; /* VS Code Grey */
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
-        /* TOP BAR */
+
+        /* TOOLBAR */
         header {
             background: #333;
-            padding: 10px 20px;
+            padding: 8px 15px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 15px;
             border-bottom: 1px solid #007bff;
         }
-        .logo { font-weight: bold; color: #007bff; letter-spacing: 1px; }
-        .status-msg { font-size: 12px; color: #888; }
-
-        /* SPLIT SCREEN LAYOUT */
-        .editor-container {
-            flex: 1;
-            display: flex;
-            width: 100vw;
-        }
-
-        /* LEFT SIDE: THE CODE */
-        .code-side {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            border-right: 2px solid #333;
-        }
-        .label-bar {
-            background: #2d2d2d;
-            padding: 5px 15px;
+        .title { color: #aaa; font-size: 12px; font-weight: bold; text-transform: uppercase; flex-grow: 1; }
+        button {
+            padding: 6px 12px;
+            background: #444;
+            color: #efefef;
+            border: 1px solid #555;
+            cursor: pointer;
             font-size: 12px;
-            text-transform: uppercase;
-            color: #aaa;
+            border-radius: 3px;
         }
-        #code-input {
+        button:hover { background: #555; }
+        .btn-copy { background: #007bff; border: none; }
+        .btn-copy:hover { background: #0056b3; }
+
+        /* DUAL VIEW */
+        .workspace {
+            display: flex;
             flex: 1;
+            width: 100%;
+        }
+
+        /* THE EDITOR (LEFT) */
+        #html-input {
+            width: 50%;
             background: #1e1e1e;
-            color: #9cdcfe; /* Light Blue Code Color */
+            color: #d4d4d4; /* Standard Code Grey */
             border: none;
-            padding: 20px;
+            padding: 15px;
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 15px;
+            font-size: 14px;
             line-height: 1.5;
             resize: none;
             outline: none;
+            border-right: 1px solid #333;
         }
 
-        /* RIGHT SIDE: THE LIVE SITE */
-        .preview-side {
-            flex: 1;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-        }
-        #preview-iframe {
-            flex: 1;
+        /* THE RENDER (RIGHT) */
+        #live-render {
+            width: 50%;
+            background: #ffffff; /* Emails are usually viewed on white */
             border: none;
-            background: white;
         }
-
-        /* BOTTOM CONTROLS */
-        footer {
-            background: #252526;
-            padding: 10px 20px;
-            display: flex;
-            gap: 20px;
-            border-top: 1px solid #333;
-        }
-        button {
-            padding: 8px 20px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        .btn-copy { background: #007bff; color: white; }
-        .btn-clear { background: #d9534f; color: white; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">MLGS PREVIEW IDE v1.0</div>
-        <div class="status-msg" id="save-status">Autosave Enabled (Local)</div>
+        <div class="title">MLGS Source Editor (Live Sync)</div>
+        <div id="save-status" style="color: #5cb85c; font-size: 11px;">Data Local & Safe</div>
+        <button onclick="clearAll()">Clear</button>
+        <button class="btn-copy" onclick="copyAll()">Copy HTML</button>
     </header>
 
-    <div class="editor-container">
-        <div class="code-side">
-            <div class="label-bar">HTML Source Code</div>
-            <textarea id="code-input" spellcheck="false" oninput="run()"></textarea>
-        </div>
+    <div class="workspace">
+        <textarea id="html-input" spellcheck="false" placeholder="Paste MLGS Source Code here..." oninput="sync()"></textarea>
 
-        <div class="preview-side">
-            <div class="label-bar" style="background: #e1e1e1; color: #666;">Live Site Preview</div>
-            <iframe id="preview-iframe"></iframe>
-        </div>
+        <iframe id="live-render"></iframe>
     </div>
 
-    <footer>
-        <button class="btn-copy" onclick="copyToClipboard()">Copy All Code</button>
-        <button class="btn-clear" onclick="clearAll()">Clear Editor</button>
-        <div style="margin-left: auto; color: #5cb85c; font-weight: bold; padding-top: 5px;">
-            No Timeout Active - Data Safely Stored in Browser
-        </div>
-    </footer>
-
     <script>
-        const editor = document.getElementById('code-input');
-        const frame = document.getElementById('preview-iframe');
-        const status = document.getElementById('save-status');
+        const input = document.getElementById('html-input');
+        const render = document.getElementById('live-render');
 
-        // Initial Load
+        // Load your last work immediately
         window.onload = () => {
-            const saved = localStorage.getItem('mlgs_work_v5');
-            if (saved) {
-                editor.value = saved;
-                run();
-            } else {
-                // Default placeholder
-                editor.value = "<h1>Welcome</h1>\n<p>Start typing your MLGS HTML here...</p>";
-                run();
+            const savedData = localStorage.getItem('mlgs_live_source');
+            if (savedData) {
+                input.value = savedData;
+                sync();
             }
         };
 
-        // The "Run" function - handles preview and auto-save
-        function run() {
-            const code = editor.value;
+        function sync() {
+            const code = input.value;
             
-            // 1. Render the Preview
+            // This is the magic part: it takes the raw code and injects it 
+            // directly into the frame with no extra wrappers or "page" code.
             const blob = new Blob([code], {type: 'text/html'});
-            frame.src = URL.createObjectURL(blob);
+            render.src = URL.createObjectURL(blob);
 
-            // 2. Local Autosave
-            localStorage.setItem('mlgs_work_v5', code);
-            
-            status.innerText = "Last update: " + new Date().toLocaleTimeString();
+            // Autosave to your browser
+            localStorage.setItem('mlgs_live_source', code);
         }
 
-        function copyToClipboard() {
-            editor.select();
+        function copyAll() {
+            input.select();
             document.execCommand('copy');
-            alert("Code copied to clipboard! You can now paste this into MLGS.");
+            const status = document.getElementById('save-status');
+            status.innerText = "COPIED TO CLIPBOARD";
+            setTimeout(() => { status.innerText = "Data Local & Safe"; }, 2000);
         }
 
         function clearAll() {
-            if(confirm("Wipe everything in the editor?")) {
-                editor.value = "";
-                run();
+            if(confirm("Wipe editor?")) {
+                input.value = "";
+                sync();
             }
         }
     </script>
