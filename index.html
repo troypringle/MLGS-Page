@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>MLGS IDE - Permanent PC Save</title>
+    <title>MLGS Pro Editor</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -15,95 +15,92 @@
             overflow: hidden;
         }
 
-        /* TOP TOOLBAR */
+        /* TOP MAIN HEADER */
         header {
-            background: #2d2d2d;
+            background: #252526;
             padding: 10px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             border-bottom: 2px solid #007bff;
         }
+        .status-bar { display: flex; align-items: center; gap: 15px; }
         .ts-box {
-            background: #000;
-            color: #ffff00;
-            padding: 8px 15px;
-            font-family: 'Consolas', monospace;
-            font-weight: bold;
-            border: 1px solid #444;
-            font-size: 14px;
+            background: #000; color: #ffff00; padding: 8px 15px;
+            font-family: monospace; font-weight: bold; border: 1px solid #444; font-size: 14px;
         }
-        .controls { display: flex; gap: 10px; }
-        button {
-            padding: 10px 18px;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 4px;
-            border: none;
-            text-transform: uppercase;
-            font-size: 12px;
-            transition: 0.2s;
+        
+        /* ACTION BUTTONS */
+        .btn {
+            padding: 10px 18px; cursor: pointer; font-weight: bold;
+            border-radius: 4px; border: none; text-transform: uppercase; font-size: 12px;
         }
-        .btn-save { background: #28a745; color: white; }
-        .btn-download { background: #ffc107; color: #000; } /* Standing out */
+        .btn-pc-save { background: #ff4757; color: white; box-shadow: 0 0 8px rgba(255,71,87,0.5); }
+        .btn-pc-save:hover { background: #ff6b81; }
         .btn-copy { background: #007bff; color: white; }
-        .btn-clear { background: #dc3545; color: white; }
 
+        /* WORKSPACE */
         .workspace { flex: 1; display: flex; width: 100vw; }
         .panel { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #333; }
-        .panel-label {
-            background: #252526;
-            padding: 6px 15px;
-            font-size: 11px;
-            color: #999;
-            text-transform: uppercase;
-            font-weight: bold;
+        
+        /* TOOLBARS */
+        .toolbar {
+            background: #333; padding: 8px 15px; display: flex; gap: 8px;
+            border-bottom: 1px solid #444; align-items: center;
         }
+        .toolbar-label { font-size: 12px; color: #aaa; font-weight: bold; text-transform: uppercase; margin-right: auto; }
+        .format-btn {
+            background: #444; color: #fff; border: 1px solid #555;
+            padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold;
+        }
+        .format-btn:hover { background: #555; }
 
+        /* TEXT AREAS */
         #code-view {
-            flex: 1;
-            background: #1e1e1e;
-            color: #9cdcfe;
-            padding: 20px;
-            font-family: 'Consolas', monospace;
-            font-size: 15px;
-            border: none;
-            outline: none;
-            resize: none;
-            line-height: 1.6;
+            flex: 1; background: #1e1e1e; color: #9cdcfe; padding: 20px;
+            font-family: 'Consolas', monospace; font-size: 15px; border: none;
+            outline: none; resize: none; line-height: 1.6;
         }
 
         #visual-view {
-            flex: 1;
-            background: #ffffff;
-            color: #000;
-            padding: 30px;
-            overflow-y: auto;
-            outline: none;
+            flex: 1; background: #ffffff; color: #000; padding: 30px;
+            overflow-y: auto; outline: none; font-size: 16px;
         }
+        #visual-view:focus { box-shadow: inset 0 0 0 2px #007bff; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="ts-box" id="ts-display">LAST SAVED: NEVER</div>
-        <div class="controls">
-            <button class="btn-save" onclick="manualSave()">1. Save to Browser</button>
-            <button class="btn-download" onclick="downloadToFile()">2. Save to PC (D: Drive)</button>
-            <button class="btn-copy" onclick="copyHTML()">3. Copy for MLGS</button>
-            <button class="btn-clear" onclick="clearEditor()">Clear</button>
+        <div class="status-bar">
+            <div class="ts-box" id="ts-display">LAST SAVED: NEVER</div>
+            <div id="file-status" style="color:#28a745; font-size: 12px; font-weight: bold;">NO FILE LINKED YET</div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-copy" onclick="copyHTML()">Copy HTML</button>
+            <button class="btn btn-pc-save" onclick="saveDirectToPC()">HARD SAVE TO PC</button>
         </div>
     </header>
 
     <div class="workspace">
         <div class="panel">
-            <div class="panel-label">HTML Source Code</div>
+            <div class="toolbar">
+                <span class="toolbar-label">HTML Source Code</span>
+                <button class="format-btn" onclick="clearAll()" style="background: #dc3545; border-color: #dc3545;">Clear All</button>
+            </div>
             <textarea id="code-view" spellcheck="false" oninput="syncToVisual()"></textarea>
         </div>
         
         <div class="panel">
-            <div class="panel-label" style="background:#e8e8e8; color:#555;">Visual Designer</div>
-            <div id="visual-view" contenteditable="true" oninput="syncToCode()"></div>
+            <div class="toolbar" style="background: #e8e8e8; border-bottom: 1px solid #ccc;">
+                <span class="toolbar-label" style="color: #333;">Visual Designer</span>
+                <button class="format-btn" style="background:#fff; color:#000;" onclick="execCmd('bold')"><b>B</b></button>
+                <button class="format-btn" style="background:#fff; color:#000;" onclick="execCmd('italic')"><i>I</i></button>
+                <button class="format-btn" style="background:#fff; color:#000;" onclick="execCmd('underline')"><u>U</u></button>
+                <button class="format-btn" style="background:#fff; color:#000;" onclick="insertLink()">Link</button>
+                <button class="format-btn" style="background:#fff; color:#000;" onclick="insertImage()">Image</button>
+            </div>
+            <div id="visual-view" contenteditable="true" oninput="syncToCode()" onkeyup="syncToCode()" onmouseup="syncToCode()"></div>
         </div>
     </div>
 
@@ -111,49 +108,105 @@
         const codeView = document.getElementById('code-view');
         const visualView = document.getElementById('visual-view');
         const tsDisplay = document.getElementById('ts-display');
+        const fileStatus = document.getElementById('file-status');
+        
+        let fileHandle; // This holds the direct connection to your PC file
 
         window.onload = () => {
-            const savedHTML = localStorage.getItem('gh_mlgs_html');
-            const savedTime = localStorage.getItem('gh_mlgs_time');
+            const savedHTML = localStorage.getItem('mlgs_pro_html');
             if (savedHTML) {
                 codeView.value = savedHTML;
                 visualView.innerHTML = savedHTML;
+            } else {
+                const defaultText = "<h2>My MLGS Campaign</h2><p>Start designing here...</p>";
+                codeView.value = defaultText;
+                visualView.innerHTML = defaultText;
             }
-            if (savedTime) tsDisplay.innerText = "LAST SAVED: " + savedTime;
         };
 
-        function syncToVisual() { visualView.innerHTML = codeView.value; autoSave(); }
-        function syncToCode() { codeView.value = visualView.innerHTML; autoSave(); }
-        function autoSave() { localStorage.setItem('gh_mlgs_html', codeView.value); }
-
-        function manualSave() {
-            const now = new Date().toLocaleString();
-            localStorage.setItem('gh_mlgs_html', codeView.value);
-            localStorage.setItem('gh_mlgs_time', now);
-            tsDisplay.innerText = "LAST SAVED: " + now;
+        // --- SYNCING ---
+        function syncToVisual() {
+            visualView.innerHTML = codeView.value;
+            localStorage.setItem('mlgs_pro_html', codeView.value);
         }
 
-        // PERMANENT HARD SAVE TO PC
-        function downloadToFile() {
-            const text = codeView.value;
-            const blob = new Blob([text], { type: 'text/html' });
-            const anchor = document.createElement('a');
-            anchor.download = 'MLGS_Email_Backup.html';
-            anchor.href = window.URL.createObjectURL(blob);
-            anchor.click();
+        function syncToCode() {
+            codeView.value = visualView.innerHTML;
+            localStorage.setItem('mlgs_pro_html', codeView.value);
+        }
+
+        // --- VISUAL FORMATTING TOOLS ---
+        function execCmd(command) {
+            document.execCommand(command, false, null);
+            syncToCode();
+            visualView.focus();
+        }
+
+        function insertLink() {
+            const url = prompt("Enter the link URL:", "http://");
+            if (url) {
+                document.execCommand('createLink', false, url);
+                syncToCode();
+            }
+        }
+
+        function insertImage() {
+            const imgUrl = prompt("Enter the Image URL:", "http://");
+            if (imgUrl) {
+                document.execCommand('insertImage', false, imgUrl);
+                syncToCode();
+            }
+        }
+
+        // --- DIRECT PC SAVE (FILE SYSTEM API) ---
+        async function saveDirectToPC() {
+            try {
+                // If we haven't linked a file yet, ask the user to pick one
+                if (!fileHandle) {
+                    fileHandle = await window.showSaveFilePicker({
+                        suggestedName: 'MLGS_Daily_Mail.html',
+                        types: [{ description: 'HTML File', accept: { 'text/html': ['.html'] } }]
+                    });
+                    fileStatus.innerText = "LINKED TO: " + fileHandle.name;
+                    fileStatus.style.color = "#00ff00";
+                }
+
+                // Write directly to the file on the hard drive
+                const writable = await fileHandle.createWritable();
+                await writable.write(codeView.value);
+                await writable.close();
+
+                // Update Timestamp
+                const now = new Date().toLocaleString();
+                tsDisplay.innerText = "LAST SAVED: " + now;
+                
+                // Button feedback
+                const btn = document.querySelector('.btn-pc-save');
+                const oldText = btn.innerText;
+                btn.innerText = "✓ SAVED TO PC";
+                btn.style.background = "#28a745";
+                setTimeout(() => { 
+                    btn.innerText = oldText; 
+                    btn.style.background = "#ff4757"; 
+                }, 2000);
+
+            } catch (err) {
+                // User cancelled or browser blocked it
+                console.error("Save aborted or failed:", err);
+            }
         }
 
         function copyHTML() {
             codeView.select();
             document.execCommand('copy');
-            alert("Ready to paste into MLGS!");
+            alert("HTML Copied!");
         }
 
-        function clearEditor() {
-            if(confirm("Wipe everything?")) {
+        function clearAll() {
+            if(confirm("Wipe editor clean?")) {
                 codeView.value = "";
                 visualView.innerHTML = "";
-                autoSave();
+                localStorage.removeItem('mlgs_pro_html');
             }
         }
     </script>
