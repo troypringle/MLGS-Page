@@ -54,12 +54,14 @@
             font-weight: 900;
             padding: 10px 20px;
             border-radius: 6px;
-            background: #eee;
-            color: #555;
+            background: #eafff0;
+            color: #28a745;
+            border: 2px solid #c3e6cb;
         }
 
         .subject-row { margin-bottom: 20px; }
 
+        /* Bitwarden protection */
         #mlgs-subject-field-unique {
             width: 100%;
             padding: 15px;
@@ -134,7 +136,7 @@
 
         .timer-grid {
             display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr;
+            grid-template-columns: 1.5fr 1.2fr 1fr;
             gap: 20px;
             align-items: center;
             background: #fff;
@@ -154,7 +156,7 @@
         .footer-buttons { display: flex; gap: 15px; }
         .btn-huge { flex: 1; padding: 25px; font-size: 24px; font-weight: 900; }
 
-        .ready { color: var(--pro-green) !important; }
+        .ready-text { color: var(--pro-green) !important; }
     </style>
 </head>
 <body>
@@ -180,7 +182,7 @@
                 <select onchange="exec('fontSize', this.value); this.selectedIndex=0;"><option value="">Size</option><option value="3">Small</option><option value="4">Normal</option><option value="5">Large</option><option value="7">Huge</option></select>
                 <input type="color" oninput="exec('foreColor', this.value)" title="Color">
                 <button onclick="exec('createLink', prompt('URL:'))">Link</button>
-                <button onclick="exec('removeFormat')">Clear</button>
+                <button onclick="exec('removeFormat')">Clear Style</button>
             </div>
             <div id="visual-view" contenteditable="true" oninput="syncFromVisual()" onmouseup="syncSelectionToCode()" onkeyup="syncSelectionToCode()"></div>
         </div>
@@ -199,7 +201,7 @@
         <button class="btn btn-green" onclick="downloadHTML()">Save & Download</button>
         <button class="btn btn-blue" onclick="restoreCheckpoint()">Restore Last Download</button>
         <button class="btn btn-grey" onclick="document.getElementById('file-input').click()">Browse PC Files</button>
-        <button class="btn btn-grey" onclick="copyHTML()">Copy HTML</button>
+        <button class="btn btn-grey" onclick="copyHTML()">Copy HTML Source</button>
     </div>
     <input type="file" id="file-input" style="display:none" accept=".html">
 
@@ -211,20 +213,20 @@
             </div>
             
             <div class="timer-display-box">
-                <span class="timer-label">Last Action Recorded:</span>
-                <span id="last-saved-time" style="font-weight: bold; font-size: 14px; margin-top: 10px; display: block;">NEVER</span>
+                <span class="timer-label">Last Mailing Recorded:</span>
+                <span id="last-saved-time-str" style="font-weight: bold; font-size: 14px; margin-top: 10px; display: block; color: #555;">NEVER RECORDED</span>
             </div>
 
             <div class="manual-override-box">
                 <label>Manual Time Override:</label>
                 <input type="datetime-local" id="manual-time-input">
-                <button class="btn btn-blue" style="padding: 5px; font-size: 11px;" onclick="applyManualTime()">Apply Override</button>
+                <button class="btn btn-blue" style="padding: 5px; font-size: 11px;" onclick="applyManualTime()">Set Custom Action Time</button>
             </div>
         </div>
 
         <div class="footer-buttons">
-            <a href="https://www.myleadgensecret.com/index.php" target="_blank" class="btn btn-green btn-huge">OPEN MLGS LOGIN</a>
-            <button class="btn btn-blue btn-huge" onclick="manualLogTime()">UPDATE TIME / DATE NOW</button>
+            <a href="https://www.myleadgenserect.com/login" target="_blank" class="btn btn-green btn-huge">OPEN MLGS LOGIN</a>
+            <button class="btn btn-blue btn-huge" onclick="triggerMailingAction()">UPDATE TIME / DATE NOW</button>
         </div>
     </footer>
 </div>
@@ -236,10 +238,10 @@
     const titleInput = document.getElementById('mlgs-subject-field-unique');
     const fileInput = document.getElementById('file-input');
     const countdownDisplay = document.getElementById('countdown-timer');
-    const lastSavedDisplay = document.getElementById('last-saved-time');
+    const lastSavedDisplay = document.getElementById('last-saved-time-str');
     const topBanner = document.getElementById('top-timer-banner');
 
-    // 1. Core Sync Logic
+    // --- SYNTAX & EDITOR CORE ---
     function applySyntax(code) {
         let escaped = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         escaped = escaped.replace(/&lt;(\/?[a-z1-6]+)(.*?)&gt;/gi, (match, tag, attrs) => {
@@ -250,10 +252,11 @@
         htmlColored.innerHTML = escaped + "\n";
     }
 
-    function syncFromCode() { applySyntax(htmlRaw.value); visualView.innerHTML = htmlRaw.value; autoSave(); }
-    function syncFromVisual() { htmlRaw.value = visualView.innerHTML; applySyntax(htmlRaw.value); autoSave(); }
+    function syncFromCode() { applySyntax(htmlRaw.value); visualView.innerHTML = htmlRaw.value; autoSaveContent(); }
+    function syncFromVisual() { htmlRaw.value = visualView.innerHTML; applySyntax(htmlRaw.value); autoSaveContent(); }
     function syncCodeScroll() { htmlColored.scrollTop = htmlRaw.scrollTop; }
     function exec(cmd, val = null) { document.execCommand(cmd, false, val); syncFromVisual(); }
+
     function syncSelectionToCode() {
         const selection = window.getSelection();
         const selectedText = selection.toString().trim();
@@ -268,28 +271,36 @@
         }
     }
 
-    // 2. Mailing Timer Logic
+    // --- MAILING ACTION LOGIC (PERSISTENT) ---
+
+    // This runs EVERY SECOND to update the UI
     function updateMailingTimer() {
-        const lastSavedTimestamp = parseInt(localStorage.getItem('mlgs_timestamp_ms'));
-        if (!lastSavedTimestamp) {
+        const lastSavedTimestamp = localStorage.getItem('mlgs_timestamp_ms');
+        
+        if (!lastSavedTimestamp || lastSavedTimestamp === "null") {
             countdownDisplay.innerText = "00:00:00";
+            countdownDisplay.classList.add('ready-text');
             topBanner.innerText = "READY TO MAIL";
+            topBanner.style.background = "#eafff0";
+            topBanner.style.color = "#28a745";
+            topBanner.style.borderColor = "#c3e6cb";
             return;
         }
 
         const waitPeriod = 23 * 60 * 60 * 1000; // 23 Hours
-        const nextMailTime = lastSavedTimestamp + waitPeriod;
+        const nextMailTime = parseInt(lastSavedTimestamp) + waitPeriod;
         const now = Date.now();
         const diff = nextMailTime - now;
 
         if (diff <= 0) {
             countdownDisplay.innerText = "00:00:00";
-            countdownDisplay.classList.add('ready');
+            countdownDisplay.classList.add('ready-text');
             topBanner.innerText = "READY TO MAIL";
             topBanner.style.background = "#eafff0";
             topBanner.style.color = "#28a745";
+            topBanner.style.borderColor = "#c3e6cb";
         } else {
-            countdownDisplay.classList.remove('ready');
+            countdownDisplay.classList.remove('ready-text');
             const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
             const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
             const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
@@ -297,24 +308,13 @@
             topBanner.innerText = `NEXT MAIL IN: ${h}:${m}:${s}`;
             topBanner.style.background = "#fff5f5";
             topBanner.style.color = "#d9534f";
+            topBanner.style.borderColor = "#f5c6cb";
         }
     }
 
-    // 3. Time Controls
-    function manualLogTime() {
-        const now = Date.now();
-        saveTimestamp(now);
-    }
-
-    function applyManualTime() {
-        const inputVal = document.getElementById('manual-time-input').value;
-        if (!inputVal) return alert("Select a date and time first!");
-        const manualMs = new Date(inputVal).getTime();
-        saveTimestamp(manualMs);
-        alert("Manual time override applied!");
-    }
-
-    function saveTimestamp(ms) {
+    // Only call this when an actual mailing event occurs
+    function triggerMailingAction(customMs = null) {
+        const ms = customMs || Date.now();
         localStorage.setItem('mlgs_timestamp_ms', ms);
         const dateString = new Date(ms).toLocaleString();
         localStorage.setItem('mlgs_last_timestamp_str', dateString);
@@ -322,9 +322,21 @@
         updateMailingTimer();
     }
 
-    // 4. File Operations
-    function autoSave() {
-        localStorage.setItem('mlgs_session', JSON.stringify({ title: titleInput.value, content: htmlRaw.value }));
+    function applyManualTime() {
+        const inputVal = document.getElementById('manual-time-input').value;
+        if (!inputVal) return alert("Select a date and time first!");
+        const manualMs = new Date(inputVal).getTime();
+        triggerMailingAction(manualMs);
+    }
+
+    // --- PERSISTENCE ---
+
+    // Auto-save content (does NOT affect the mailing timer)
+    function autoSaveContent() {
+        localStorage.setItem('mlgs_session_content', JSON.stringify({ 
+            title: titleInput.value, 
+            content: htmlRaw.value 
+        }));
     }
 
     function downloadHTML() {
@@ -335,7 +347,9 @@
         a.href = URL.createObjectURL(blob);
         a.download = userTitle + '.html';
         a.click();
-        manualLogTime();
+        
+        // This resets the 23-hour timer
+        triggerMailingAction();
     }
 
     function restoreCheckpoint() {
@@ -351,26 +365,30 @@
     function copyHTML() {
         htmlRaw.select();
         document.execCommand('copy');
-        alert("HTML Copied!");
+        alert("HTML Source Copied!");
     }
 
-    // 5. App Initialization
+    // --- INITIALIZATION ---
     window.onload = () => {
-        const session = localStorage.getItem('mlgs_session');
+        // Load Content
+        const session = localStorage.getItem('mlgs_session_content');
         if (session) {
             const data = JSON.parse(session);
             titleInput.value = data.title || "";
             htmlRaw.value = data.content || "";
             syncFromCode();
         }
+
+        // Load Mailing Timestamp String
         const lastStr = localStorage.getItem('mlgs_last_timestamp_str');
         if (lastStr) lastSavedDisplay.innerText = lastStr;
         
+        // Start Timer loop
         setInterval(updateMailingTimer, 1000);
         updateMailingTimer();
     };
 
-    titleInput.addEventListener('input', autoSave);
+    titleInput.addEventListener('input', autoSaveContent);
     fileInput.onchange = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
