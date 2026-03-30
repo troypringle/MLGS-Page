@@ -3,41 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLGS Content Hub - Pro Editor</title>
+    <title>MLGS Content Hub - Pro Sync Edition</title>
     <style>
         :root {
             --pro-blue: #0056b3;
             --pro-blue-hover: #004494;
             --pro-green: #28a745;
             --pro-green-hover: #218838;
-            --bg-light: #f8f9fa;
-            --border-color: #ced4da;
-            /* Syntax Highlighting Colors */
+            --bg-page: #f8f9fa;
+            --border: #ced4da;
+            /* Notepad++ Style Colors */
             --syn-tag: #0000ff;
             --syn-attr: #ff0000;
             --syn-val: #8000ff;
-            --syn-str: #808080;
+            --syn-token: #d63384;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--bg-light);
+            background-color: var(--bg-page);
             margin: 0;
-            padding: 25px; /* Padding around layout */
+            padding: 25px; /* Outer layout padding */
             color: #333;
         }
 
         .hub-container {
-            max-width: 1500px;
+            max-width: 1550px;
             margin: 0 auto;
             background: #fff;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
             border: 1px solid #ddd;
         }
 
-        /* Header Area */
+        /* Header & Status */
         header {
             display: flex;
             justify-content: space-between;
@@ -47,7 +47,7 @@
             margin-bottom: 25px;
         }
 
-        .header-left h1 {
+        h1 {
             margin: 0;
             color: var(--pro-blue);
             font-size: 32px;
@@ -55,46 +55,39 @@
             text-transform: uppercase;
         }
 
-        #timestamp-display {
-            font-size: 24px; /* Larger text */
+        .timestamp-status {
+            font-size: 24px; /* Large Noticeable Text */
             font-weight: 800;
             color: #d9534f;
             background: #fff5f5;
-            padding: 10px 20px;
+            padding: 10px 25px;
             border-radius: 8px;
             border: 2px solid #f5c6cb;
+            transition: 0.3s;
         }
 
-        #timestamp-display.saved {
+        .timestamp-status.saved {
             color: var(--pro-green);
             background: #f0fff4;
             border-color: #c3e6cb;
         }
 
-        /* Subject Line */
-        .subject-box {
+        /* Subject Section */
+        .subject-row {
             margin-bottom: 25px;
-        }
-
-        .subject-box label {
-            display: block;
-            font-weight: bold;
-            color: var(--pro-blue);
-            margin-bottom: 8px;
-            font-size: 18px;
         }
 
         #email-title {
             width: 100%;
             padding: 15px;
             font-size: 20px;
-            border: 2px solid var(--border-color);
+            font-weight: bold;
+            border: 2px solid var(--border);
             border-radius: 6px;
-            box-sizing: border-box;
-            outline: none;
+            outline-color: var(--pro-blue);
         }
 
-        /* The Workspace */
+        /* Editor Workspace */
         .workspace {
             display: flex;
             gap: 25px;
@@ -106,26 +99,24 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            border: 2px solid var(--border-color);
+            border: 2px solid var(--border);
             border-radius: 8px;
-            background: #fff;
             overflow: hidden;
-            position: relative;
+            background: #fff;
         }
 
-        .pane-header {
+        .pane-label {
             background: var(--pro-blue);
             color: white;
             padding: 10px 15px;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
             text-transform: uppercase;
-            display: flex;
-            justify-content: space-between;
+            letter-spacing: 1px;
         }
 
-        /* Notepad++ Style Editor (Left) */
-        .editor-container {
+        /* Left Pane: HTML Notepad++ Style */
+        .code-wrapper {
             position: relative;
             flex: 1;
             overflow: hidden;
@@ -134,10 +125,10 @@
         #html-input, #html-highlight {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            margin: 0; padding: 15px;
+            margin: 0; padding: 20px;
             font-family: 'Consolas', 'Courier New', monospace;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
             white-space: pre-wrap;
             word-wrap: break-word;
             box-sizing: border-box;
@@ -148,7 +139,7 @@
         #html-input {
             color: transparent;
             background: transparent;
-            caret-color: #000;
+            caret-color: black;
             z-index: 2;
             resize: none;
             outline: none;
@@ -160,31 +151,33 @@
             pointer-events: none;
         }
 
-        /* Syntax Color Tokens */
-        .token-tag { color: var(--syn-tag); font-weight: bold; }
-        .token-attr { color: var(--syn-attr); }
-        .token-val { color: var(--syn-val); }
-        .token-token { color: #d63384; font-weight: bold; background: #fff0f5; }
+        /* Syntax Coloring */
+        .tag { color: var(--syn-tag); font-weight: bold; }
+        .attr { color: var(--syn-attr); }
+        .val { color: var(--syn-val); }
+        .token { color: var(--syn-token); background: #fff0f5; font-weight: bold; }
 
-        /* WYSIWYG Visual Editor (Right) */
+        /* Right Pane: Visual WYSIWYG */
         .toolbar {
-            background: #f8f9fa;
-            border-bottom: 1px solid var(--border-color);
-            padding: 8px;
+            background: #f1f3f5;
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            gap: 5px;
+            gap: 8px;
             flex-wrap: wrap;
             align-items: center;
         }
 
         .toolbar button, .toolbar select {
-            padding: 5px 10px;
-            border: 1px solid #ccc;
-            background: #fff;
+            padding: 6px 12px;
+            border: 1px solid #adb5bd;
+            background: white;
             cursor: pointer;
             font-weight: bold;
             border-radius: 4px;
         }
+
+        .toolbar button:hover { background: #e9ecef; }
 
         .toolbar input[type="color"] {
             width: 35px; height: 35px; border: none; cursor: pointer; background: none;
@@ -192,18 +185,18 @@
 
         #visual-editor {
             flex: 1;
-            padding: 20px;
+            padding: 25px;
             overflow-y: auto;
             outline: none;
             background: white;
         }
 
-        /* Bottom Controls */
+        /* Actions Bar */
         .action-bar {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 15px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .btn {
@@ -214,37 +207,36 @@
             border-radius: 8px;
             cursor: pointer;
             text-transform: uppercase;
-            transition: 0.2s;
             text-align: center;
             text-decoration: none;
+            transition: 0.2s;
         }
 
         .btn-green { background: var(--pro-green); color: white; }
         .btn-green:hover { background: var(--pro-green-hover); }
-
         .btn-blue { background: var(--pro-blue); color: white; }
         .btn-blue:hover { background: var(--pro-blue-hover); }
-
         .btn-grey { background: #6c757d; color: white; }
 
-        .footer-login {
+        /* Footer MLGS Link */
+        footer {
             text-align: center;
             border-top: 2px solid #eee;
             padding-top: 30px;
         }
 
-        .btn-mlgs {
+        .mlgs-login-btn {
             display: inline-block;
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             background: var(--pro-green);
             color: white;
-            padding: 22px;
-            font-size: 24px;
+            padding: 25px;
+            font-size: 26px;
             font-weight: 900;
-            border-radius: 10px;
+            border-radius: 12px;
             text-decoration: none;
-            box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+            box-shadow: 0 5px 15px rgba(40,167,69,0.3);
         }
     </style>
 </head>
@@ -252,64 +244,65 @@
 
 <div class="hub-container">
     <header>
-        <div class="header-left">
-            <h1>MLGS Content Hub</h1>
-        </div>
-        <div id="timestamp-display">LAST SENT/SAVED: NEVER</div>
+        <h1>MLGS Content Hub</h1>
+        <div id="timestamp" class="timestamp-status">LAST SAVED: NEVER</div>
     </header>
 
-    <div class="subject-box">
-        <label>Subject Line / Title</label>
-        <input type="text" id="email-title" placeholder="Enter Subject Line..." oninput="autoSave()">
+    <div class="subject-row">
+        <input type="text" id="email-title" placeholder="Enter Subject Line or Title..." oninput="autoSave()">
     </div>
 
     <div class="workspace">
-        <!-- LEFT: NOTEPAD++ STYLE CODE EDITOR -->
+        <!-- LEFT: HTML CODE (Notepad++ Highlighting) -->
         <div class="pane">
-            <div class="pane-header">HTML Code (Copy for MLGS)</div>
-            <div class="editor-container">
+            <div class="pane-label">HTML Source Code</div>
+            <div class="code-wrapper">
                 <div id="html-highlight"></div>
                 <textarea id="html-input" spellcheck="false" oninput="syncFromCode()" onscroll="syncScroll()"></textarea>
             </div>
         </div>
 
-        <!-- RIGHT: VISUAL WYSIWYG EDITOR -->
+        <!-- RIGHT: VISUAL EDITOR (Syncs to Highlight) -->
         <div class="pane">
-            <div class="pane-header">Visual Preview / Editor</div>
+            <div class="pane-label">Visual Editor (Sync to Code)</div>
             <div class="toolbar">
-                <button onclick="exec('bold')">B</button>
-                <button onclick="exec('italic')">I</button>
-                <button onclick="exec('underline')">U</button>
-                <select onchange="exec('fontSize', this.value); this.selectedIndex=0;">
-                    <option value="">Size</option>
+                <button onclick="cmd('bold')">B</button>
+                <button onclick="cmd('italic')">I</button>
+                <button onclick="cmd('underline')">U</button>
+                <select onchange="cmd('fontSize', this.value); this.selectedIndex=0;">
+                    <option value="">Text Size</option>
                     <option value="3">Small</option>
                     <option value="4">Normal</option>
                     <option value="5">Large</option>
                     <option value="7">Extra Large</option>
                 </select>
-                <input type="color" oninput="exec('foreColor', this.value)" title="Text Color">
-                <button onclick="exec('createLink', prompt('Link URL:'))">Link</button>
-                <button onclick="exec('insertImage', prompt('Image URL:'))">Img</button>
-                <button onclick="exec('justifyLeft')">L</button>
-                <button onclick="exec('justifyCenter')">C</button>
-                <button onclick="exec('removeFormat')">Clear</button>
+                <input type="color" oninput="cmd('foreColor', this.value)" title="Change Color">
+                <button onclick="cmd('createLink', prompt('Enter URL:'))">Link</button>
+                <button onclick="cmd('insertImage', prompt('Enter Image URL:'))">Image</button>
+                <button onclick="cmd('justifyLeft')">Left</button>
+                <button onclick="cmd('justifyCenter')">Center</button>
+                <button onclick="cmd('removeFormat')">Clear Style</button>
             </div>
-            <div id="visual-editor" contenteditable="true" oninput="syncFromVisual()"></div>
+            <div id="visual-editor" contenteditable="true" 
+                 oninput="syncFromVisual()" 
+                 onmouseup="syncFromVisual()" 
+                 onkeyup="syncFromVisual()">
+            </div>
         </div>
     </div>
 
     <div class="action-bar">
         <button class="btn btn-green" onclick="downloadFile()">Save & Download</button>
         <button class="btn btn-blue" onclick="manualSave()">Save to Browser</button>
-        <button class="btn btn-blue" onclick="document.getElementById('file-loader').click()">Load from PC</button>
-        <button class="btn btn-grey" onclick="copyHTML()">Copy HTML Code</button>
+        <button class="btn btn-blue" onclick="document.getElementById('file-input').click()">Load Last File</button>
+        <button class="btn btn-grey" onclick="copyCode()">Copy HTML</button>
     </div>
 
-    <input type="file" id="file-loader" style="display:none" accept=".html">
+    <input type="file" id="file-input" style="display:none" accept=".html">
 
-    <div class="footer-login">
-        <a href="https://www.myleadgenserect.com/login" target="_blank" class="btn-mlgs">OPEN MLGS LOGIN</a>
-    </div>
+    <footer>
+        <a href="https://www.myleadgenserect.com/login" target="_blank" class="mlgs-login-btn">OPEN MLGS LOGIN</a>
+    </footer>
 </div>
 
 <script>
@@ -317,41 +310,41 @@
     const htmlHighlight = document.getElementById('html-highlight');
     const visualEditor = document.getElementById('visual-editor');
     const emailTitle = document.getElementById('email-title');
-    const timeDisplay = document.getElementById('timestamp-display');
-    const fileLoader = document.getElementById('file-loader');
+    const timeStatus = document.getElementById('timestamp');
+    const fileInput = document.getElementById('file-input');
 
-    // 1. Syntax Highlighting Engine (Notepad++ Style)
-    function applyHighlighting(code) {
+    // 1. Syntax Highlighter (Notepad++ Mimic)
+    function applySyntax(code) {
         let escaped = code
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;");
 
-        // Highlight Tags
+        // Color Tags
         escaped = escaped.replace(/&lt;(\/?[a-z1-6]+)(.*?)&gt;/gi, (match, tag, attrs) => {
             let highlightedAttrs = attrs.replace(/([a-z-]+)=(['"].*?['"])/gi, 
-                '<span class="token-attr">$1</span>=<span class="token-val">$2</span>');
-            return `<span class="token-tag">&lt;${tag}</span>${highlightedAttrs}<span class="token-tag">&gt;</span>`;
+                '<span class="attr">$1</span>=<span class="val">$2</span>');
+            return `<span class="tag">&lt;${tag}</span>${highlightedAttrs}<span class="tag">&gt;</span>`;
         });
 
-        // Highlight MLGS Tokens {!token}
-        escaped = escaped.replace(/\{!(.*?)\}/g, '<span class="token-token">{!$1}</span>');
+        // Color MLGS Tokens
+        escaped = escaped.replace(/\{!(.*?)\}/g, '<span class="token">{!$1}</span>');
 
         htmlHighlight.innerHTML = escaped + "\n";
     }
 
-    // 2. Synchronization Logic
+    // 2. Real-Time Sync Logic
     function syncFromCode() {
         const code = htmlInput.value;
-        applyHighlighting(code);
-        visualEditor.innerHTML = code; // The visual editor displays what is in the code
+        applySyntax(code);
+        visualEditor.innerHTML = code;
         autoSave();
     }
 
     function syncFromVisual() {
         const code = visualEditor.innerHTML;
-        htmlInput.value = code; // The code editor shows resulting HTML
-        applyHighlighting(code);
+        htmlInput.value = code;
+        applySyntax(code);
         autoSave();
     }
 
@@ -359,49 +352,47 @@
         htmlHighlight.scrollTop = htmlInput.scrollTop;
     }
 
-    // 3. WYSIWYG Commands
-    function exec(command, value = null) {
+    // 3. Editor Commands
+    function cmd(command, value = null) {
         document.execCommand(command, false, value);
-        syncFromVisual();
+        syncFromVisual(); // Immediate reflect in HTML box
     }
 
-    // 4. Persistence Logic (Browser & PC)
+    // 4. Saving & Loading
     function autoSave() {
         const data = {
             title: emailTitle.value,
             html: htmlInput.value,
-            time: localStorage.getItem('mlgs_last_time') || "NEVER"
+            time: localStorage.getItem('mlgs_pro_time') || "NEVER"
         };
-        localStorage.setItem('mlgs_data', JSON.stringify(data));
+        localStorage.setItem('mlgs_pro_data', JSON.stringify(data));
     }
 
     function manualSave() {
         const now = new Date().toLocaleString();
-        localStorage.setItem('mlgs_last_time', now);
+        localStorage.setItem('mlgs_pro_time', now);
         updateTimeUI(now);
         autoSave();
-        alert("Content saved to browser session.");
+        alert("Saved to Browser!");
     }
 
     function updateTimeUI(time) {
-        timeDisplay.innerText = `LAST SENT/SAVED: ${time}`;
-        timeDisplay.classList.add('saved');
+        timeStatus.innerText = `LAST SAVED: ${time}`;
+        timeStatus.classList.add('saved');
     }
 
     function downloadFile() {
         const code = htmlInput.value;
         const blob = new Blob([code], { type: 'text/html' });
         const a = document.createElement('a');
-        const filename = (emailTitle.value || 'mlgs-email') + '.html';
-        
+        const name = (emailTitle.value || 'mlgs-email') + '.html';
         a.href = URL.createObjectURL(blob);
-        a.download = filename;
+        a.download = name;
         a.click();
-        
         manualSave();
     }
 
-    fileLoader.onchange = (e) => {
+    fileInput.onchange = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -412,17 +403,17 @@
         reader.readAsText(file);
     };
 
-    function copyHTML() {
+    function copyCode() {
         htmlInput.select();
         document.execCommand('copy');
-        alert("HTML Code copied! You can now paste this into the MLGS 'Source' box.");
+        alert("HTML Code Copied for MLGS!");
     }
 
-    // 5. Initialize on Load
+    // 5. Initialize
     window.onload = () => {
-        const saved = localStorage.getItem('mlgs_data');
-        if (saved) {
-            const data = JSON.parse(saved);
+        const stored = localStorage.getItem('mlgs_pro_data');
+        if (stored) {
+            const data = JSON.parse(stored);
             emailTitle.value = data.title || "";
             htmlInput.value = data.html || "";
             syncFromCode();
