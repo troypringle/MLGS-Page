@@ -23,7 +23,7 @@
             font-family: 'Segoe UI', Arial, sans-serif;
             background-color: var(--bg-page);
             margin: 0;
-            padding: 25px; /* Minimum padding around layout */
+            padding: 25px; 
             color: #333;
         }
 
@@ -37,7 +37,6 @@
             border: 1px solid #ddd;
         }
 
-        /* Header & Large Status Box */
         header {
             display: flex;
             justify-content: space-between;
@@ -56,7 +55,7 @@
         }
 
         .status-badge {
-            font-size: 26px; /* Highly Noticeable */
+            font-size: 26px;
             font-weight: 900;
             padding: 12px 30px;
             border-radius: 8px;
@@ -72,12 +71,12 @@
             border-color: #c3e6cb;
         }
 
-        /* Bitwarden Protected Subject Box */
         .subject-row {
             margin-bottom: 25px;
         }
 
-        #mlgs-doc-title-input {
+        /* Bitwarden protection: unique ID and autocomplete off */
+        #mlgs-subject-field-unique {
             width: 100%;
             padding: 18px;
             font-size: 22px;
@@ -88,7 +87,6 @@
             outline-color: var(--pro-blue);
         }
 
-        /* Workspace Grid: Visual (Left) | HTML (Right) */
         .workspace {
             display: flex;
             gap: 25px;
@@ -115,7 +113,7 @@
             font-size: 13px;
         }
 
-        /* Visual Pane */
+        /* Visual Pane (Left) */
         .wysiwyg-toolbar {
             background: #f8f9fa;
             border-bottom: 1px solid var(--border);
@@ -143,7 +141,7 @@
             font-size: 16px;
         }
 
-        /* HTML Pane (Notepad++ Highlighting) */
+        /* HTML Pane (Right) */
         .code-container {
             position: relative;
             flex: 1;
@@ -167,13 +165,11 @@
         #html-raw { color: transparent; background: transparent; caret-color: black; z-index: 2; outline: none; resize: none;}
         #html-colored { z-index: 1; color: #333; pointer-events: none; }
 
-        /* Highlight Tokens */
         .tag { color: var(--syn-tag); font-weight: bold; }
         .attr { color: var(--syn-attr); }
         .val { color: var(--syn-val); }
         .mlgs-var { color: white; background: var(--syn-token); padding: 0 3px; border-radius: 3px; font-weight: bold; }
 
-        /* Main Action Bar */
         .action-bar {
             display: flex;
             gap: 15px;
@@ -196,13 +192,11 @@
 
         .btn-main { flex: 2; padding: 22px; font-size: 18px; }
         .btn-sub { flex: 1; font-size: 14px; }
-
         .btn-green { background: var(--pro-green); color: white; }
         .btn-blue { background: var(--pro-blue); color: white; }
         .btn-grey { background: #6c757d; color: white; }
         .btn:hover { opacity: 0.95; transform: translateY(-1px); }
 
-        /* Footer Controls */
         footer {
             border-top: 2px solid #eee;
             padding-top: 30px;
@@ -227,7 +221,7 @@
     </header>
 
     <div class="subject-row">
-        <input type="text" id="mlgs-doc-title-input" 
+        <input type="text" id="mlgs-subject-field-unique" 
                placeholder="Subject Line / Email Title..." 
                autocomplete="off" 
                data-lpignore="true">
@@ -270,17 +264,15 @@
         </div>
     </div>
 
-    <!-- Main Buttons Bar -->
     <div class="action-bar">
         <button class="btn btn-green btn-main" onclick="downloadHTML()">Save & Download File</button>
-        <button class="btn btn-blue btn-main" onclick="restoreCheckpoint()">Restore Last Downloaded</button>
+        <button class="btn btn-blue btn-main" onclick="restoreCheckpoint()">Restore Last Download</button>
         <button class="btn btn-grey btn-sub" onclick="document.getElementById('file-input').click()">Browse PC Files</button>
         <button class="btn btn-grey btn-sub" onclick="copyHTML()">Copy HTML Source</button>
     </div>
 
     <input type="file" id="file-input" style="display:none" accept=".html">
 
-    <!-- Footer -->
     <footer>
         <a href="https://www.myleadgenserect.com/login" target="_blank" class="btn btn-green btn-footer">OPEN MLGS LOGIN</a>
         <button class="btn btn-blue btn-footer" onclick="manualLogTime()">UPDATE TIME / DATE</button>
@@ -291,11 +283,11 @@
     const visualView = document.getElementById('visual-view');
     const htmlRaw = document.getElementById('html-raw');
     const htmlColored = document.getElementById('html-colored');
-    const titleInput = document.getElementById('mlgs-doc-title-input');
+    const titleInput = document.getElementById('mlgs-subject-field-unique');
     const statusBox = document.getElementById('save-status-box');
     const fileInput = document.getElementById('file-input');
 
-    // 1. Selection Sync
+    // Selection Sync
     function syncSelectionToCode() {
         const selection = window.getSelection();
         const selectedText = selection.toString().trim();
@@ -312,7 +304,7 @@
         autoSave();
     }
 
-    // 2. Syntax Highlighting
+    // Syntax Highlighting
     function applySyntax(code) {
         let escaped = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         escaped = escaped.replace(/&lt;(\/?[a-z1-6]+)(.*?)&gt;/gi, (match, tag, attrs) => {
@@ -323,7 +315,7 @@
         htmlColored.innerHTML = escaped + "\n";
     }
 
-    // 3. Sync Logic
+    // Sync Logic
     function syncFromCode() {
         applySyntax(htmlRaw.value);
         visualView.innerHTML = htmlRaw.value;
@@ -339,7 +331,7 @@
     function syncCodeScroll() { htmlColored.scrollTop = htmlRaw.scrollTop; }
     function exec(cmd, val = null) { document.execCommand(cmd, false, val); syncFromVisual(); }
 
-    // 4. Persistence & Loading
+    // Persistence
     function autoSave() {
         const data = {
             title: titleInput.value,
@@ -359,27 +351,30 @@
         statusBox.classList.add('saved');
     }
 
-    // Save logic stores a Checkpoint specifically
+    // The Download function now strictly uses the input title
     function downloadHTML() {
+        const userTitle = titleInput.value.trim() || 'mlgs-email';
         const code = htmlRaw.value;
+        
         const checkpoint = {
-            title: titleInput.value,
+            title: userTitle,
             content: code,
             time: new Date().toLocaleString()
         };
+        
+        // Save this exact version as the checkpoint
         localStorage.setItem('mlgs_checkpoint', JSON.stringify(checkpoint));
         
         const blob = new Blob([code], { type: 'text/html' });
         const a = document.createElement('a');
-        const filename = (titleInput.value || 'mlgs-email') + '.html';
         a.href = URL.createObjectURL(blob);
-        a.download = filename;
+        a.download = userTitle + '.html';
         a.click();
         
         manualLogTime();
     }
 
-    // Restore loads the specific Checkpoint (Last Download)
+    // Restore the one we JUST saved to memory
     function restoreCheckpoint() {
         const saved = localStorage.getItem('mlgs_checkpoint');
         if (saved) {
@@ -387,9 +382,9 @@
             titleInput.value = data.title;
             htmlRaw.value = data.content;
             syncFromCode();
-            alert("Restored version from last 'Save & Download' action.");
+            alert("Restored: " + data.title);
         } else {
-            alert("No download checkpoint found.");
+            alert("No download history found.");
         }
     }
 
@@ -414,6 +409,7 @@
         const session = localStorage.getItem('mlgs_current_session');
         if (session) {
             const data = JSON.parse(session);
+            // Ensure no generic "Backup" text overwrites your session title
             titleInput.value = data.title || "";
             htmlRaw.value = data.content || "";
             syncFromCode();
@@ -424,6 +420,5 @@
 
     titleInput.addEventListener('input', autoSave);
 </script>
-
 </body>
 </html>
