@@ -2,331 +2,219 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLGS Content Hub - REDESIGNED</title>
+    <title>MLGS Ultimate IDE</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #121212;
-            padding: 20px;
-            color: #e0e0e0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .container {
-            max-width: 1200px; /* Wider for the side-by-side editor */
-            margin: 0 auto;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             background: #1e1e1e;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border: 1px solid #333;
-            flex: 1;
+            color: #d4d4d4;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        h1 {
-            text-transform: uppercase;
-            font-weight: 900;
-            border-bottom: 3px solid #007bff;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            font-size: 28px;
-            color: #fff;
+        /* TOP HEADER: LOAD & SAVE CONTROLS */
+        header {
+            background: #252526; padding: 12px 20px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 2px solid #007bff;
         }
-
-        .timestamp-box {
-            background: #000;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffff00;
-            margin-bottom: 20px;
-            border: 2px solid #333;
-            text-align: center;
-        }
-
-        .action-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
+        .file-controls { display: flex; gap: 10px; align-items: center; }
         .btn {
-            padding: 12px;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-transform: uppercase;
-            color: white;
-            transition: 0.2s;
+            padding: 10px 16px; cursor: pointer; font-weight: bold;
+            border-radius: 4px; border: none; text-transform: uppercase; font-size: 13px;
         }
-        .btn-load { background: #17a2b8; }
-        .btn-save-pc { background: #28a745; }
-        .btn-copy { background: #007bff; }
-        .btn-gh { background: #6f42c1; }
+        .btn-load { background: #17a2b8; color: white; }
+        .btn-save { background: #ff4757; color: white; }
+        .btn-copy { background: #007bff; color: white; }
+        #file-status { color: #ffc107; font-size: 13px; font-weight: bold; margin-left: 15px; }
 
-        .section label {
-            display: block;
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 8px;
-            color: #007bff;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #444;
-            border-radius: 6px;
-            background-color: #252525;
-            color: #fff;
-            margin-bottom: 20px;
-        }
-
-        /* DUAL EDITOR SETUP */
-        .editor-workspace {
-            display: flex;
-            gap: 20px;
-            flex: 1;
-            min-height: 0; /* Important for scrolling */
-        }
-
-        .editor-col {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        textarea {
-            flex: 1;
-            width: 100%;
-            padding: 15px;
-            font-size: 16px;
-            border: 1px solid #444;
-            border-radius: 6px;
-            background-color: #252525;
-            color: #00ff00; /* Matrix Green */
-            font-family: 'Consolas', monospace;
-            resize: none;
-        }
-
-        /* THE VISUAL DESIGNER BOX */
-        .visual-box {
-            flex: 1;
-            background: #fff;
-            color: #000;
-            border-radius: 6px;
-            padding: 15px;
-            overflow-y: auto;
-            outline: none;
-        }
-
+        /* WORKSPACE: LEFT (CODE) / RIGHT (VISUAL) */
+        .workspace { flex: 1; display: flex; width: 100vw; }
+        .panel { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #333; }
+        
+        /* TOOLBARS */
         .toolbar {
-            background: #eee;
-            padding: 5px;
-            display: flex;
-            gap: 5px;
-            border-radius: 6px 6px 0 0;
-            border: 1px solid #ccc;
-            border-bottom: none;
+            background: #333; padding: 10px; display: flex; gap: 6px;
+            border-bottom: 1px solid #444; align-items: center; flex-wrap: wrap;
+        }
+        .toolbar-title { color: #aaa; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-right: auto; }
+        
+        /* FORMATTING BUTTONS (THE REAL DESIGNER) */
+        .fmt-btn {
+            background: #fff; color: #000; border: 1px solid #ccc;
+            padding: 6px 10px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 14px;
+        }
+        .fmt-btn:hover { background: #e2e2e2; }
+
+        /* EDITORS */
+        #code-view {
+            flex: 1; background: #1e1e1e; color: #9cdcfe; padding: 20px;
+            font-family: 'Consolas', monospace; font-size: 15px; border: none;
+            outline: none; resize: none; line-height: 1.6;
         }
 
-        .tool {
-            padding: 5px 10px;
-            font-weight: bold;
-            cursor: pointer;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            font-size: 12px;
-            color: #333;
+        #visual-view {
+            flex: 1; background: #ffffff; color: #000; padding: 30px;
+            overflow-y: auto; outline: none; font-size: 16px; font-family: Arial, sans-serif;
         }
+        #visual-view:focus { box-shadow: inset 0 0 0 2px #007bff; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>MLGS Content Hub</h1>
-
-    <div class="timestamp-box" id="timestamp-display">
-        LAST SAVED: NEVER
-    </div>
-
-    <div class="action-grid">
-        <button class="btn btn-load" onclick="triggerLoad()">📂 Load from PC</button>
-        <button class="btn btn-save-pc" onclick="saveToPC()">💾 Save to PC</button>
-        <button class="btn btn-copy" onclick="copyHTML()">📋 Copy HTML</button>
-        <button class="btn btn-gh" onclick="triggerImageUpload()">🖼️ Upload Image</button>
-    </div>
-
-    <input type="file" id="file-input" style="display:none" accept=".html" onchange="loadFile(event)">
-    <input type="file" id="img-input" style="display:none" accept="image/*" onchange="uploadToGithub(event)">
-
-    <div class="section">
-        <label for="email-title">Subject Line / Title:</label>
-        <input type="text" id="email-title" placeholder="Enter Subject Line..." oninput="autoSave()">
-    </div>
-
-    <div class="editor-workspace">
-        <div class="editor-col">
-            <label>HTML / Code View (Matrix Green):</label>
-            <textarea id="email-body" placeholder="Paste HTML here..." oninput="syncToVisual()"></textarea>
+    <header>
+        <div class="file-controls">
+            <button class="btn btn-load" onclick="loadFromPC()">📂 LOAD FROM PC</button>
+            <button class="btn btn-save" onclick="saveToPC()">💾 SAVE TO PC</button>
+            <span id="file-status">NO FILE LOADED</span>
         </div>
+        <div>
+            <button class="btn btn-copy" onclick="copyHTML()">📋 COPY HTML FOR MLGS</button>
+        </div>
+    </header>
 
-        <div class="editor-col">
-            <label>Visual Designer / Preview:</label>
+    <div class="workspace">
+        <div class="panel">
             <div class="toolbar">
-                <button class="tool" onclick="doCmd('bold')">B</button>
-                <button class="tool" onclick="doCmd('italic')">I</button>
-                <button class="tool" onclick="doCmd('underline')">U</button>
-                <button class="tool" onclick="doLink()">Link</button>
-                <button class="tool" style="background:#ff4757; color:white;" onclick="doCmd('removeFormat')">Clear</button>
+                <span class="toolbar-title">HTML Code View</span>
             </div>
-            <div id="visual-editor" class="visual-box" contenteditable="true" oninput="syncToCode()"></div>
+            <textarea id="code-view" spellcheck="false" oninput="syncToVisual()"></textarea>
+        </div>
+        
+        <div class="panel">
+            <div class="toolbar" style="background: #e9ecef; border-bottom: 1px solid #ccc;">
+                <span class="toolbar-title" style="color: #333;">Visual Designer Toolbar:</span>
+                <button class="fmt-btn" onclick="format('bold')" title="Bold"><b>B</b></button>
+                <button class="fmt-btn" onclick="format('italic')" title="Italic"><i>I</i></button>
+                <button class="fmt-btn" onclick="format('underline')" title="Underline"><u>U</u></button>
+                <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+                <button class="fmt-btn" onclick="format('justifyLeft')" title="Left Align">Left</button>
+                <button class="fmt-btn" onclick="format('justifyCenter')" title="Center Align">Center</button>
+                <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+                <button class="fmt-btn" onclick="format('insertUnorderedList')" title="Bullet List">• List</button>
+                <button class="fmt-btn" onclick="format('insertOrderedList')" title="Number List">1. List</button>
+                <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+                <button class="fmt-btn" onclick="insertLink()" title="Add Link">🔗 Link</button>
+                <button class="fmt-btn" onclick="insertImage()" title="Add Image">🖼️ Image</button>
+            </div>
+            
+            <div id="visual-view" contenteditable="true" oninput="syncToCode()" onkeyup="syncToCode()" onmouseup="syncToCode()">
+                <h2>My MLGS Email</h2>
+                <p>Highlight this text and click the <b>B</b> button above!</p>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    const codeArea = document.getElementById('email-body');
-    const visualArea = document.getElementById('visual-editor');
-    const subjectInput = document.getElementById('email-title');
-    const tsDisplay = document.getElementById('timestamp-display');
-
-    // 1. AUTO-LOAD ON START
-    window.onload = () => {
-        const savedHTML = localStorage.getItem('mlgs_html');
-        const savedSub = localStorage.getItem('mlgs_sub');
-        const savedTime = localStorage.getItem('mlgs_time');
+    <script>
+        const codeView = document.getElementById('code-view');
+        const visualView = document.getElementById('visual-view');
+        const fileStatus = document.getElementById('file-status');
         
-        if(savedHTML) { codeArea.value = savedHTML; syncToVisual(); }
-        if(savedSub) subjectInput.value = savedSub;
-        if(savedTime) tsDisplay.innerText = "LAST SAVED: " + savedTime;
-    };
+        let fileHandle = null;
 
-    // 2. SYNCING LOGIC
-    function syncToVisual() {
-        visualArea.innerHTML = codeArea.value;
-        autoSave();
-    }
-
-    function syncToCode() {
-        codeArea.value = visualArea.innerHTML;
-        autoSave();
-    }
-
-    function autoSave() {
-        localStorage.setItem('mlgs_html', codeArea.value);
-        localStorage.setItem('mlgs_sub', subjectInput.value);
-    }
-
-    // 3. PC LOAD (RELIABLE METHOD)
-    function triggerLoad() { document.getElementById('file-input').click(); }
-    
-    function loadFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            let content = e.target.result;
-            // Check for hidden subject line
-            if (content.startsWith('\n');
-                subjectInput.value = parts[0].replace('\n');
+        // --- 1. FILE LOAD (OPEN FROM D: DRIVE) ---
+        async function loadFromPC() {
+            try {
+                // Open file picker
+                [fileHandle] = await window.showOpenFilePicker({
+                    types: [{ description: 'HTML Files', accept: { 'text/html': ['.html'] } }]
+                });
+                
+                // Read the file content
+                const fileData = await fileHandle.getFile();
+                const htmlContent = await fileData.text();
+                
+                // Put content into both editors
+                codeView.value = htmlContent;
+                visualView.innerHTML = htmlContent;
+                
+                // Update UI
+                fileStatus.innerText = "📁 LOADED: " + fileHandle.name;
+                fileStatus.style.color = "#28a745";
+            } catch (err) {
+                console.log("Load cancelled or failed.");
             }
-            codeArea.value = content;
-            syncToVisual();
-            updateTimestamp();
-        };
-        reader.readAsText(file);
-    }
+        }
 
-    // 4. PC SAVE (RELIABLE METHOD)
-    function saveToPC() {
-        const subject = subjectInput.value || "Campaign";
-        const content = `\n${codeArea.value}`;
-        const blob = new Blob([content], { type: 'text/html' });
-        const link = document.createElement('a');
-        
-        link.href = URL.createObjectURL(blob);
-        link.download = subject.replace(/\s+/g, '_') + ".html";
-        link.click();
-        
-        updateTimestamp();
-        URL.revokeObjectURL(link.href);
-    }
+        // --- 2. FILE SAVE (OVERWRITE D: DRIVE FILE) ---
+        async function saveToPC() {
+            try {
+                // If no file loaded yet, ask where to save
+                if (!fileHandle) {
+                    fileHandle = await window.showSaveFilePicker({
+                        suggestedName: 'MLGS_Email.html',
+                        types: [{ description: 'HTML File', accept: { 'text/html': ['.html'] } }]
+                    });
+                }
 
-    function updateTimestamp() {
-        const now = new Date().toLocaleString();
-        tsDisplay.innerText = "LAST SAVED: " + now;
-        localStorage.setItem('mlgs_time', now);
-    }
+                // Overwrite the file with current code
+                const writable = await fileHandle.createWritable();
+                await writable.write(codeView.value);
+                await writable.close();
 
-    // 5. EDITOR TOOLS
-    function doCmd(cmd) { 
-        document.execCommand(cmd, false, null); 
-        syncToCode(); 
-    }
-    
-    function doLink() {
-        const url = prompt("Enter URL:", "https://");
-        if(url) { document.execCommand('createLink', false, url); syncToCode(); }
-    }
+                // Button feedback
+                const btn = document.querySelector('.btn-save');
+                btn.innerText = "✓ SAVED!";
+                btn.style.background = "#28a745";
+                fileStatus.innerText = "💾 SAVED: " + fileHandle.name;
+                fileStatus.style.color = "#28a745";
+                
+                setTimeout(() => { 
+                    btn.innerText = "💾 SAVE TO PC"; 
+                    btn.style.background = "#ff4757"; 
+                }, 2000);
 
-    function copyHTML() {
-        codeArea.select();
-        document.execCommand('copy');
-        alert("HTML Copied to Clipboard!");
-    }
+            } catch (err) {
+                console.log("Save cancelled or failed.");
+            }
+        }
 
-    // 6. GITHUB UPLOAD (OPTIONAL BUT BUILT-IN)
-    function triggerImageUpload() { document.getElementById('img-input').click(); }
-    
-    async function uploadToGithub(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const token = localStorage.getItem('gh_token') || prompt("Enter GitHub Token:");
-        if(!token) return;
-        localStorage.setItem('gh_token', token);
+        // --- 3. THE VISUAL FORMATTING ENGINE ---
+        // This is what makes the visual designer actually work like an editor
+        function format(command) {
+            visualView.focus(); // Must focus the editor first
+            document.execCommand(command, false, null);
+            syncToCode();
+        }
 
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const base64 = e.target.result.split(',')[1];
-            const fileName = `img_${Date.now()}.png`;
-            const url = `https://api.github.com/repos/troypringle/MLGS-Mailer/contents/images/${fileName}`;
-
-            tsDisplay.innerText = "UPLOADING TO GITHUB...";
-
-            const res = await fetch(url, {
-                method: 'PUT',
-                headers: { 'Authorization': `token ${token}` },
-                body: JSON.stringify({ message: 'upload', content: base64 })
-            });
-
-            if(res.ok) {
-                const rawUrl = `https://raw.githubusercontent.com/troypringle/MLGS-Mailer/main/images/${fileName}`;
-                visualArea.focus();
-                document.execCommand('insertImage', false, rawUrl);
+        function insertLink() {
+            visualView.focus();
+            const url = prompt("Enter the website link (e.g., https://...):", "https://");
+            if (url) {
+                document.execCommand('createLink', false, url);
                 syncToCode();
-                tsDisplay.innerText = "IMAGE UPLOADED & INSERTED";
-            } else {
-                alert("Upload failed. Check token/repo.");
             }
-        };
-        reader.readAsDataURL(file);
-    }
-</script>
+        }
 
+        function insertImage() {
+            visualView.focus();
+            const imgUrl = prompt("Enter the image URL:", "https://");
+            if (imgUrl) {
+                document.execCommand('insertImage', false, imgUrl);
+                syncToCode();
+            }
+        }
+
+        // --- 4. TWO-WAY SYNCING ---
+        function syncToVisual() {
+            visualView.innerHTML = codeView.value;
+        }
+
+        function syncToCode() {
+            codeView.value = visualView.innerHTML;
+        }
+
+        function copyHTML() {
+            codeView.select();
+            document.execCommand('copy');
+            alert("HTML Copied to Clipboard!");
+        }
+
+        // Initialize sync on startup
+        window.onload = syncToCode;
+    </script>
 </body>
 </html>
