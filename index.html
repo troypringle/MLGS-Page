@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>MLGS Pro Editor</title>
+    <title>MLGS Ultimate IDE</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -15,47 +15,41 @@
             overflow: hidden;
         }
 
-        /* TOP MAIN HEADER */
+        /* TOP HEADER: LOAD & SAVE CONTROLS */
         header {
-            background: #252526;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            background: #252526; padding: 12px 20px;
+            display: flex; align-items: center; justify-content: space-between;
             border-bottom: 2px solid #007bff;
         }
-        .status-bar { display: flex; align-items: center; gap: 15px; }
-        .ts-box {
-            background: #000; color: #ffff00; padding: 8px 15px;
-            font-family: monospace; font-weight: bold; border: 1px solid #444; font-size: 14px;
-        }
-        
-        /* ACTION BUTTONS */
+        .file-controls { display: flex; gap: 10px; align-items: center; }
         .btn {
-            padding: 10px 18px; cursor: pointer; font-weight: bold;
-            border-radius: 4px; border: none; text-transform: uppercase; font-size: 12px;
+            padding: 10px 16px; cursor: pointer; font-weight: bold;
+            border-radius: 4px; border: none; text-transform: uppercase; font-size: 13px;
         }
-        .btn-pc-save { background: #ff4757; color: white; box-shadow: 0 0 8px rgba(255,71,87,0.5); }
-        .btn-pc-save:hover { background: #ff6b81; }
+        .btn-load { background: #17a2b8; color: white; }
+        .btn-save { background: #ff4757; color: white; }
         .btn-copy { background: #007bff; color: white; }
+        #file-status { color: #ffc107; font-size: 13px; font-weight: bold; margin-left: 15px; }
 
-        /* WORKSPACE */
+        /* WORKSPACE: LEFT (CODE) / RIGHT (VISUAL) */
         .workspace { flex: 1; display: flex; width: 100vw; }
         .panel { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #333; }
         
         /* TOOLBARS */
         .toolbar {
-            background: #333; padding: 8px 15px; display: flex; gap: 8px;
-            border-bottom: 1px solid #444; align-items: center;
+            background: #333; padding: 10px; display: flex; gap: 6px;
+            border-bottom: 1px solid #444; align-items: center; flex-wrap: wrap;
         }
-        .toolbar-label { font-size: 12px; color: #aaa; font-weight: bold; text-transform: uppercase; margin-right: auto; }
-        .format-btn {
-            background: #444; color: #fff; border: 1px solid #555;
-            padding: 5px 10px; cursor: pointer; border-radius: 3px; font-weight: bold;
+        .toolbar-title { color: #aaa; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-right: auto; }
+        
+        /* FORMATTING BUTTONS (THE REAL DESIGNER) */
+        .fmt-btn {
+            background: #fff; color: #000; border: 1px solid #ccc;
+            padding: 6px 10px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 14px;
         }
-        .format-btn:hover { background: #555; }
+        .fmt-btn:hover { background: #e2e2e2; }
 
-        /* TEXT AREAS */
+        /* EDITORS */
         #code-view {
             flex: 1; background: #1e1e1e; color: #9cdcfe; padding: 20px;
             font-family: 'Consolas', monospace; font-size: 15px; border: none;
@@ -64,7 +58,7 @@
 
         #visual-view {
             flex: 1; background: #ffffff; color: #000; padding: 30px;
-            overflow-y: auto; outline: none; font-size: 16px;
+            overflow-y: auto; outline: none; font-size: 16px; font-family: Arial, sans-serif;
         }
         #visual-view:focus { box-shadow: inset 0 0 0 2px #007bff; }
     </style>
@@ -72,78 +66,123 @@
 <body>
 
     <header>
-        <div class="status-bar">
-            <div class="ts-box" id="ts-display">LAST SAVED: NEVER</div>
-            <div id="file-status" style="color:#28a745; font-size: 12px; font-weight: bold;">NO FILE LINKED YET</div>
+        <div class="file-controls">
+            <button class="btn btn-load" onclick="loadFromPC()">📂 LOAD FROM PC</button>
+            <button class="btn btn-save" onclick="saveToPC()">💾 SAVE TO PC</button>
+            <span id="file-status">NO FILE LOADED</span>
         </div>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-copy" onclick="copyHTML()">Copy HTML</button>
-            <button class="btn btn-pc-save" onclick="saveDirectToPC()">HARD SAVE TO PC</button>
+        <div>
+            <button class="btn btn-copy" onclick="copyHTML()">📋 COPY HTML FOR MLGS</button>
         </div>
     </header>
 
     <div class="workspace">
         <div class="panel">
             <div class="toolbar">
-                <span class="toolbar-label">HTML Source Code</span>
-                <button class="format-btn" onclick="clearAll()" style="background: #dc3545; border-color: #dc3545;">Clear All</button>
+                <span class="toolbar-title">HTML Code View</span>
             </div>
             <textarea id="code-view" spellcheck="false" oninput="syncToVisual()"></textarea>
         </div>
         
         <div class="panel">
-            <div class="toolbar" style="background: #e8e8e8; border-bottom: 1px solid #ccc;">
-                <span class="toolbar-label" style="color: #333;">Visual Designer</span>
-                <button class="format-btn" style="background:#fff; color:#000;" onclick="execCmd('bold')"><b>B</b></button>
-                <button class="format-btn" style="background:#fff; color:#000;" onclick="execCmd('italic')"><i>I</i></button>
-                <button class="format-btn" style="background:#fff; color:#000;" onclick="execCmd('underline')"><u>U</u></button>
-                <button class="format-btn" style="background:#fff; color:#000;" onclick="insertLink()">Link</button>
-                <button class="format-btn" style="background:#fff; color:#000;" onclick="insertImage()">Image</button>
+            <div class="toolbar" style="background: #e9ecef; border-bottom: 1px solid #ccc;">
+                <span class="toolbar-title" style="color: #333;">Visual Designer Toolbar:</span>
+                <button class="fmt-btn" onclick="format('bold')" title="Bold"><b>B</b></button>
+                <button class="fmt-btn" onclick="format('italic')" title="Italic"><i>I</i></button>
+                <button class="fmt-btn" onclick="format('underline')" title="Underline"><u>U</u></button>
+                <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+                <button class="fmt-btn" onclick="format('justifyLeft')" title="Left Align">Left</button>
+                <button class="fmt-btn" onclick="format('justifyCenter')" title="Center Align">Center</button>
+                <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+                <button class="fmt-btn" onclick="format('insertUnorderedList')" title="Bullet List">• List</button>
+                <button class="fmt-btn" onclick="format('insertOrderedList')" title="Number List">1. List</button>
+                <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+                <button class="fmt-btn" onclick="insertLink()" title="Add Link">🔗 Link</button>
+                <button class="fmt-btn" onclick="insertImage()" title="Add Image">🖼️ Image</button>
             </div>
-            <div id="visual-view" contenteditable="true" oninput="syncToCode()" onkeyup="syncToCode()" onmouseup="syncToCode()"></div>
+            
+            <div id="visual-view" contenteditable="true" oninput="syncToCode()" onkeyup="syncToCode()" onmouseup="syncToCode()">
+                <h2>My MLGS Email</h2>
+                <p>Highlight this text and click the <b>B</b> button above!</p>
+            </div>
         </div>
     </div>
 
     <script>
         const codeView = document.getElementById('code-view');
         const visualView = document.getElementById('visual-view');
-        const tsDisplay = document.getElementById('ts-display');
         const fileStatus = document.getElementById('file-status');
         
-        let fileHandle; // This holds the direct connection to your PC file
+        let fileHandle = null;
 
-        window.onload = () => {
-            const savedHTML = localStorage.getItem('mlgs_pro_html');
-            if (savedHTML) {
-                codeView.value = savedHTML;
-                visualView.innerHTML = savedHTML;
-            } else {
-                const defaultText = "<h2>My MLGS Campaign</h2><p>Start designing here...</p>";
-                codeView.value = defaultText;
-                visualView.innerHTML = defaultText;
+        // --- 1. FILE LOAD (OPEN FROM D: DRIVE) ---
+        async function loadFromPC() {
+            try {
+                // Open file picker
+                [fileHandle] = await window.showOpenFilePicker({
+                    types: [{ description: 'HTML Files', accept: { 'text/html': ['.html'] } }]
+                });
+                
+                // Read the file content
+                const fileData = await fileHandle.getFile();
+                const htmlContent = await fileData.text();
+                
+                // Put content into both editors
+                codeView.value = htmlContent;
+                visualView.innerHTML = htmlContent;
+                
+                // Update UI
+                fileStatus.innerText = "📁 LOADED: " + fileHandle.name;
+                fileStatus.style.color = "#28a745";
+            } catch (err) {
+                console.log("Load cancelled or failed.");
             }
-        };
-
-        // --- SYNCING ---
-        function syncToVisual() {
-            visualView.innerHTML = codeView.value;
-            localStorage.setItem('mlgs_pro_html', codeView.value);
         }
 
-        function syncToCode() {
-            codeView.value = visualView.innerHTML;
-            localStorage.setItem('mlgs_pro_html', codeView.value);
+        // --- 2. FILE SAVE (OVERWRITE D: DRIVE FILE) ---
+        async function saveToPC() {
+            try {
+                // If no file loaded yet, ask where to save
+                if (!fileHandle) {
+                    fileHandle = await window.showSaveFilePicker({
+                        suggestedName: 'MLGS_Email.html',
+                        types: [{ description: 'HTML File', accept: { 'text/html': ['.html'] } }]
+                    });
+                }
+
+                // Overwrite the file with current code
+                const writable = await fileHandle.createWritable();
+                await writable.write(codeView.value);
+                await writable.close();
+
+                // Button feedback
+                const btn = document.querySelector('.btn-save');
+                btn.innerText = "✓ SAVED!";
+                btn.style.background = "#28a745";
+                fileStatus.innerText = "💾 SAVED: " + fileHandle.name;
+                fileStatus.style.color = "#28a745";
+                
+                setTimeout(() => { 
+                    btn.innerText = "💾 SAVE TO PC"; 
+                    btn.style.background = "#ff4757"; 
+                }, 2000);
+
+            } catch (err) {
+                console.log("Save cancelled or failed.");
+            }
         }
 
-        // --- VISUAL FORMATTING TOOLS ---
-        function execCmd(command) {
+        // --- 3. THE VISUAL FORMATTING ENGINE ---
+        // This is what makes the visual designer actually work like an editor
+        function format(command) {
+            visualView.focus(); // Must focus the editor first
             document.execCommand(command, false, null);
             syncToCode();
-            visualView.focus();
         }
 
         function insertLink() {
-            const url = prompt("Enter the link URL:", "http://");
+            visualView.focus();
+            const url = prompt("Enter the website link (e.g., https://...):", "https://");
             if (url) {
                 document.execCommand('createLink', false, url);
                 syncToCode();
@@ -151,64 +190,31 @@
         }
 
         function insertImage() {
-            const imgUrl = prompt("Enter the Image URL:", "http://");
+            visualView.focus();
+            const imgUrl = prompt("Enter the image URL:", "https://");
             if (imgUrl) {
                 document.execCommand('insertImage', false, imgUrl);
                 syncToCode();
             }
         }
 
-        // --- DIRECT PC SAVE (FILE SYSTEM API) ---
-        async function saveDirectToPC() {
-            try {
-                // If we haven't linked a file yet, ask the user to pick one
-                if (!fileHandle) {
-                    fileHandle = await window.showSaveFilePicker({
-                        suggestedName: 'MLGS_Daily_Mail.html',
-                        types: [{ description: 'HTML File', accept: { 'text/html': ['.html'] } }]
-                    });
-                    fileStatus.innerText = "LINKED TO: " + fileHandle.name;
-                    fileStatus.style.color = "#00ff00";
-                }
+        // --- 4. TWO-WAY SYNCING ---
+        function syncToVisual() {
+            visualView.innerHTML = codeView.value;
+        }
 
-                // Write directly to the file on the hard drive
-                const writable = await fileHandle.createWritable();
-                await writable.write(codeView.value);
-                await writable.close();
-
-                // Update Timestamp
-                const now = new Date().toLocaleString();
-                tsDisplay.innerText = "LAST SAVED: " + now;
-                
-                // Button feedback
-                const btn = document.querySelector('.btn-pc-save');
-                const oldText = btn.innerText;
-                btn.innerText = "✓ SAVED TO PC";
-                btn.style.background = "#28a745";
-                setTimeout(() => { 
-                    btn.innerText = oldText; 
-                    btn.style.background = "#ff4757"; 
-                }, 2000);
-
-            } catch (err) {
-                // User cancelled or browser blocked it
-                console.error("Save aborted or failed:", err);
-            }
+        function syncToCode() {
+            codeView.value = visualView.innerHTML;
         }
 
         function copyHTML() {
             codeView.select();
             document.execCommand('copy');
-            alert("HTML Copied!");
+            alert("HTML Copied to Clipboard!");
         }
 
-        function clearAll() {
-            if(confirm("Wipe editor clean?")) {
-                codeView.value = "";
-                visualView.innerHTML = "";
-                localStorage.removeItem('mlgs_pro_html');
-            }
-        }
+        // Initialize sync on startup
+        window.onload = syncToCode;
     </script>
 </body>
 </html>
