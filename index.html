@@ -2,207 +2,168 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLGS Content Tracker - Desktop Editor</title>
+    <title>MLGS IDE - Split View</title>
     <style>
-        /* FULL SCREEN DESKTOP LAYOUT */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
             height: 100vh;
-            width: 100vw;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
+        /* TOP BAR */
         header {
-            background: #1a1a1a;
-            color: white;
+            background: #333;
             padding: 10px 20px;
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            border-bottom: 2px solid #007bff;
+            align-items: center;
+            border-bottom: 1px solid #007bff;
         }
-        .header-title { font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        
-        /* WIDE TABS */
-        .tabs { display: flex; background: #fff; border-bottom: 1px solid #ccc; }
-        .tab {
-            flex: 1; /* Makes tabs fill the whole width */
-            padding: 15px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            border-bottom: 4px solid transparent;
-            transition: 0.2s;
-        }
-        .tab.active {
-            border-bottom: 4px solid #007bff;
-            color: #007bff;
-            background: #f8f9fa;
-        }
+        .logo { font-weight: bold; color: #007bff; letter-spacing: 1px; }
+        .status-msg { font-size: 12px; color: #888; }
 
-        .main-content { flex: 1; position: relative; width: 100%; }
-        .panel {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: none;
-        }
-        .panel.active { display: flex; flex-direction: column; }
-
-        /* EDITOR STYLING */
-        #code-editor {
+        /* SPLIT SCREEN LAYOUT */
+        .editor-container {
             flex: 1;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 16px;
-            padding: 25px;
-            border: none;
-            outline: none;
-            background: #ffffff;
-            color: #222;
-            width: 100%;
-        }
-        .toolbar {
-            padding: 10px 20px;
-            background: #e9ecef;
-            border-bottom: 1px solid #ccc;
             display: flex;
-            gap: 15px;
+            width: 100vw;
+        }
+
+        /* LEFT SIDE: THE CODE */
+        .code-side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 2px solid #333;
+        }
+        .label-bar {
+            background: #2d2d2d;
+            padding: 5px 15px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #aaa;
+        }
+        #code-input {
+            flex: 1;
+            background: #1e1e1e;
+            color: #9cdcfe; /* Light Blue Code Color */
+            border: none;
+            padding: 20px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 15px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+        }
+
+        /* RIGHT SIDE: THE LIVE SITE */
+        .preview-side {
+            flex: 1;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+        }
+        #preview-iframe {
+            flex: 1;
+            border: none;
+            background: white;
+        }
+
+        /* BOTTOM CONTROLS */
+        footer {
+            background: #252526;
+            padding: 10px 20px;
+            display: flex;
+            gap: 20px;
+            border-top: 1px solid #333;
         }
         button {
-            padding: 10px 20px;
+            padding: 8px 20px;
             border-radius: 4px;
-            border: 1px solid #adb5bd;
+            border: none;
             cursor: pointer;
             font-weight: bold;
-            background: #fff;
+            text-transform: uppercase;
         }
-        button.primary { background: #28a745; color: white; border: none; }
-
-        /* LIVE VIEW - NO CODE, JUST THE SITE */
-        #preview-frame { 
-            flex: 1; 
-            border: none; 
-            width: 100%; 
-            height: 100%; 
-            background: white; 
-        }
+        .btn-copy { background: #007bff; color: white; }
+        .btn-clear { background: #d9534f; color: white; }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="header-title">MLGS Desktop Hub</div>
-        <div id="status" style="color:#28a745; font-size: 12px;">SYSTEM ACTIVE</div>
+        <div class="logo">MLGS PREVIEW IDE v1.0</div>
+        <div class="status-msg" id="save-status">Autosave Enabled (Local)</div>
     </header>
 
-    <div class="tabs">
-        <div class="tab active" id="tab-code" onclick="switchMode(0)">✏️ EDIT HTML CODE</div>
-        <div class="tab" id="tab-preview" onclick="switchMode(1)">👁️ LIVE VIEW (FULL PAGE)</div>
-    </div>
-
-    <div class="main-content">
-        <div class="panel active" id="code-panel">
-            <div class="toolbar">
-                <button class="primary" onclick="switchMode(1)">RUN & VIEW SITE</button>
-                <button onclick="copyCode()">COPY CODE</button>
-                <button onclick="resetToOriginal()">RESET</button>
-            </div>
-            <textarea id="code-editor" spellcheck="false" placeholder="Paste your HTML here..."></textarea>
+    <div class="editor-container">
+        <div class="code-side">
+            <div class="label-bar">HTML Source Code</div>
+            <textarea id="code-input" spellcheck="false" oninput="run()"></textarea>
         </div>
 
-        <div class="panel" id="preview-panel">
-            <iframe id="preview-frame"></iframe>
+        <div class="preview-side">
+            <div class="label-bar" style="background: #e1e1e1; color: #666;">Live Site Preview</div>
+            <iframe id="preview-iframe"></iframe>
         </div>
     </div>
 
+    <footer>
+        <button class="btn-copy" onclick="copyToClipboard()">Copy All Code</button>
+        <button class="btn-clear" onclick="clearAll()">Clear Editor</button>
+        <div style="margin-left: auto; color: #5cb85c; font-weight: bold; padding-top: 5px;">
+            No Timeout Active - Data Safely Stored in Browser
+        </div>
+    </footer>
+
     <script>
-        // Default Starting Template
-        const defaultHTML = `<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: sans-serif; background: #f0f0f0; padding: 40px; color: #333; }
-        .tracker-card { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); border: 1px solid #ddd; }
-        .ts-display { background: #222; color: #ffff00; padding: 20px; font-weight: 900; text-align: center; border-radius: 8px; margin-bottom: 20px; font-size: 24px; }
-        label { font-weight: bold; display: block; margin-bottom: 5px; color: #007bff; }
-        input, textarea { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
-        .btn-save { width: 100%; padding: 20px; background: #28a745; color: white; border: none; border-radius: 6px; font-size: 20px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-    </style>
-</head>
-<body>
-    <div class="tracker-card">
-        <div class="ts-display" id="ts">LAST LOGGED: NEVER</div>
-        <label>Subject Line:</label>
-        <input type="text" id="sub" placeholder="Enter Subject...">
-        <label>Email Content:</label>
-        <textarea id="body" rows="12" placeholder="Paste Content..."></textarea>
-        <button class="btn-save" onclick="doSave()">SAVE & LOG TIMESTAMP</button>
-    </div>
-    <script>
-        window.onload = function() {
-            document.getElementById('sub').value = localStorage.getItem('mlgs_sub') || '';
-            document.getElementById('body').value = localStorage.getItem('mlgs_body') || '';
-            document.getElementById('ts').innerText = "LAST LOGGED: " + (localStorage.getItem('mlgs_ts') || 'NEVER');
+        const editor = document.getElementById('code-input');
+        const frame = document.getElementById('preview-iframe');
+        const status = document.getElementById('save-status');
+
+        // Initial Load
+        window.onload = () => {
+            const saved = localStorage.getItem('mlgs_work_v5');
+            if (saved) {
+                editor.value = saved;
+                run();
+            } else {
+                // Default placeholder
+                editor.value = "<h1>Welcome</h1>\n<p>Start typing your MLGS HTML here...</p>";
+                run();
+            }
         };
-        function doSave() {
-            const now = new Date().toLocaleString();
-            localStorage.setItem('mlgs_sub', document.getElementById('sub').value);
-            localStorage.setItem('mlgs_body', document.getElementById('body').value);
-            localStorage.setItem('mlgs_ts', now);
-            document.getElementById('ts').innerText = "LAST LOGGED: " + now;
-            alert("SUCCESS: Saved at " + now);
-        }
-    <\/script>
-</body>
-</html>`;
 
-        const editor = document.getElementById('code-editor');
-        const frame = document.getElementById('preview-frame');
-
-        function init() {
-            // Load saved code if user has edited before, else use default
-            editor.value = localStorage.getItem('mlgs_editor_code') || defaultHTML;
-            updateLiveView();
-        }
-
-        function switchMode(mode) {
-            // Save code progress locally before switching
-            localStorage.setItem('mlgs_editor_code', editor.value);
-
-            document.getElementById('tab-code').classList.toggle('active', mode === 0);
-            document.getElementById('tab-preview').classList.toggle('active', mode === 1);
-            document.getElementById('code-panel').classList.toggle('active', mode === 0);
-            document.getElementById('preview-panel').classList.toggle('active', mode === 1);
-            
-            if(mode === 1) updateLiveView();
-        }
-
-        function updateLiveView() {
+        // The "Run" function - handles preview and auto-save
+        function run() {
             const code = editor.value;
-            // This Blob method ensures the iframe treats it as a rendered website, not text
+            
+            // 1. Render the Preview
             const blob = new Blob([code], {type: 'text/html'});
-            const url = URL.createObjectURL(blob);
-            frame.src = url;
+            frame.src = URL.createObjectURL(blob);
+
+            // 2. Local Autosave
+            localStorage.setItem('mlgs_work_v5', code);
+            
+            status.innerText = "Last update: " + new Date().toLocaleTimeString();
         }
 
-        function copyCode() {
-            navigator.clipboard.writeText(editor.value);
-            alert("Code copied to clipboard!");
+        function copyToClipboard() {
+            editor.select();
+            document.execCommand('copy');
+            alert("Code copied to clipboard! You can now paste this into MLGS.");
         }
 
-        function resetToOriginal() {
-            if(confirm("Wipe edits and reset to original tracker?")) {
-                editor.value = defaultHTML;
-                updateLiveView();
+        function clearAll() {
+            if(confirm("Wipe everything in the editor?")) {
+                editor.value = "";
+                run();
             }
         }
-
-        window.onload = init;
     </script>
 </body>
 </html>
