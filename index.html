@@ -2,123 +2,158 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>MLGS Source Mirror</title>
+    <title>MLGS IDE - Permanent PC Save</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #252526; /* VS Code Grey */
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* TOOLBAR */
+        /* TOP TOOLBAR */
         header {
-            background: #333;
-            padding: 8px 15px;
+            background: #2d2d2d;
+            padding: 10px 20px;
             display: flex;
             align-items: center;
-            gap: 15px;
-            border-bottom: 1px solid #007bff;
+            justify-content: space-between;
+            border-bottom: 2px solid #007bff;
         }
-        .title { color: #aaa; font-size: 12px; font-weight: bold; text-transform: uppercase; flex-grow: 1; }
-        button {
-            padding: 6px 12px;
-            background: #444;
-            color: #efefef;
-            border: 1px solid #555;
-            cursor: pointer;
-            font-size: 12px;
-            border-radius: 3px;
-        }
-        button:hover { background: #555; }
-        .btn-copy { background: #007bff; border: none; }
-        .btn-copy:hover { background: #0056b3; }
-
-        /* DUAL VIEW */
-        .workspace {
-            display: flex;
-            flex: 1;
-            width: 100%;
-        }
-
-        /* THE EDITOR (LEFT) */
-        #html-input {
-            width: 50%;
-            background: #1e1e1e;
-            color: #d4d4d4; /* Standard Code Grey */
-            border: none;
-            padding: 15px;
-            font-family: 'Consolas', 'Monaco', monospace;
+        .ts-box {
+            background: #000;
+            color: #ffff00;
+            padding: 8px 15px;
+            font-family: 'Consolas', monospace;
+            font-weight: bold;
+            border: 1px solid #444;
             font-size: 14px;
-            line-height: 1.5;
-            resize: none;
-            outline: none;
-            border-right: 1px solid #333;
+        }
+        .controls { display: flex; gap: 10px; }
+        button {
+            padding: 10px 18px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            border: none;
+            text-transform: uppercase;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        .btn-save { background: #28a745; color: white; }
+        .btn-download { background: #ffc107; color: #000; } /* Standing out */
+        .btn-copy { background: #007bff; color: white; }
+        .btn-clear { background: #dc3545; color: white; }
+
+        .workspace { flex: 1; display: flex; width: 100vw; }
+        .panel { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #333; }
+        .panel-label {
+            background: #252526;
+            padding: 6px 15px;
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            font-weight: bold;
         }
 
-        /* THE RENDER (RIGHT) */
-        #live-render {
-            width: 50%;
-            background: #ffffff; /* Emails are usually viewed on white */
+        #code-view {
+            flex: 1;
+            background: #1e1e1e;
+            color: #9cdcfe;
+            padding: 20px;
+            font-family: 'Consolas', monospace;
+            font-size: 15px;
             border: none;
+            outline: none;
+            resize: none;
+            line-height: 1.6;
+        }
+
+        #visual-view {
+            flex: 1;
+            background: #ffffff;
+            color: #000;
+            padding: 30px;
+            overflow-y: auto;
+            outline: none;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="title">MLGS Source Editor (Live Sync)</div>
-        <div id="save-status" style="color: #5cb85c; font-size: 11px;">Data Local & Safe</div>
-        <button onclick="clearAll()">Clear</button>
-        <button class="btn-copy" onclick="copyAll()">Copy HTML</button>
+        <div class="ts-box" id="ts-display">LAST SAVED: NEVER</div>
+        <div class="controls">
+            <button class="btn-save" onclick="manualSave()">1. Save to Browser</button>
+            <button class="btn-download" onclick="downloadToFile()">2. Save to PC (D: Drive)</button>
+            <button class="btn-copy" onclick="copyHTML()">3. Copy for MLGS</button>
+            <button class="btn-clear" onclick="clearEditor()">Clear</button>
+        </div>
     </header>
 
     <div class="workspace">
-        <textarea id="html-input" spellcheck="false" placeholder="Paste MLGS Source Code here..." oninput="sync()"></textarea>
-
-        <iframe id="live-render"></iframe>
+        <div class="panel">
+            <div class="panel-label">HTML Source Code</div>
+            <textarea id="code-view" spellcheck="false" oninput="syncToVisual()"></textarea>
+        </div>
+        
+        <div class="panel">
+            <div class="panel-label" style="background:#e8e8e8; color:#555;">Visual Designer</div>
+            <div id="visual-view" contenteditable="true" oninput="syncToCode()"></div>
+        </div>
     </div>
 
     <script>
-        const input = document.getElementById('html-input');
-        const render = document.getElementById('live-render');
+        const codeView = document.getElementById('code-view');
+        const visualView = document.getElementById('visual-view');
+        const tsDisplay = document.getElementById('ts-display');
 
-        // Load your last work immediately
         window.onload = () => {
-            const savedData = localStorage.getItem('mlgs_live_source');
-            if (savedData) {
-                input.value = savedData;
-                sync();
+            const savedHTML = localStorage.getItem('gh_mlgs_html');
+            const savedTime = localStorage.getItem('gh_mlgs_time');
+            if (savedHTML) {
+                codeView.value = savedHTML;
+                visualView.innerHTML = savedHTML;
             }
+            if (savedTime) tsDisplay.innerText = "LAST SAVED: " + savedTime;
         };
 
-        function sync() {
-            const code = input.value;
-            
-            // This is the magic part: it takes the raw code and injects it 
-            // directly into the frame with no extra wrappers or "page" code.
-            const blob = new Blob([code], {type: 'text/html'});
-            render.src = URL.createObjectURL(blob);
+        function syncToVisual() { visualView.innerHTML = codeView.value; autoSave(); }
+        function syncToCode() { codeView.value = visualView.innerHTML; autoSave(); }
+        function autoSave() { localStorage.setItem('gh_mlgs_html', codeView.value); }
 
-            // Autosave to your browser
-            localStorage.setItem('mlgs_live_source', code);
+        function manualSave() {
+            const now = new Date().toLocaleString();
+            localStorage.setItem('gh_mlgs_html', codeView.value);
+            localStorage.setItem('gh_mlgs_time', now);
+            tsDisplay.innerText = "LAST SAVED: " + now;
         }
 
-        function copyAll() {
-            input.select();
+        // PERMANENT HARD SAVE TO PC
+        function downloadToFile() {
+            const text = codeView.value;
+            const blob = new Blob([text], { type: 'text/html' });
+            const anchor = document.createElement('a');
+            anchor.download = 'MLGS_Email_Backup.html';
+            anchor.href = window.URL.createObjectURL(blob);
+            anchor.click();
+        }
+
+        function copyHTML() {
+            codeView.select();
             document.execCommand('copy');
-            const status = document.getElementById('save-status');
-            status.innerText = "COPIED TO CLIPBOARD";
-            setTimeout(() => { status.innerText = "Data Local & Safe"; }, 2000);
+            alert("Ready to paste into MLGS!");
         }
 
-        function clearAll() {
-            if(confirm("Wipe editor?")) {
-                input.value = "";
-                sync();
+        function clearEditor() {
+            if(confirm("Wipe everything?")) {
+                codeView.value = "";
+                visualView.innerHTML = "";
+                autoSave();
             }
         }
     </script>
