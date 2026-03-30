@@ -3,208 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLGS Content Hub - Pro WYSIWYG</title>
+    <title>MLGS Content Hub - Ultra Pro</title>
     <style>
         :root {
             --pro-blue: #0056b3;
             --pro-blue-hover: #004494;
             --pro-green: #28a745;
             --pro-green-hover: #218838;
-            --bg-page: #f0f2f5;
+            --bg-page: #f4f7f9;
             --border: #ced4da;
+            /* Syntax Highlighting Colors (Notepad++ Style) */
+            --syn-tag: #0000ff;
+            --syn-attr: #ff0000;
+            --syn-val: #8000ff;
+            --syn-str: #808080;
+            --syn-comm: #008000;
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             background-color: var(--bg-page);
-            color: #333;
             margin: 0;
-            padding: 25px; /* Added 25px padding around layout */
-            line-height: 1.6;
+            padding: 20px; /* Requested 20px+ padding */
         }
 
         .main-container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: #fff;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
         }
 
-        /* Header Section */
+        /* Top Header Area */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 3px solid var(--pro-blue);
+            margin-bottom: 20px;
+            border-bottom: 4px solid var(--pro-blue);
             padding-bottom: 15px;
-            margin-bottom: 25px;
         }
 
-        h1 {
+        .brand-section h1 {
             margin: 0;
             color: var(--pro-blue);
-            font-size: 32px;
-            font-weight: 800;
-            text-transform: uppercase;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -1px;
         }
 
-        .timestamp-status {
-            font-size: 22px; /* Larger text as requested */
-            font-weight: bold;
-            color: #d9534f; /* Noticeable Red until saved */
-            background: #fff5f5;
-            padding: 5px 15px;
+        .save-status-large {
+            font-size: 24px;
+            font-weight: 900;
+            padding: 10px 20px;
             border-radius: 8px;
+            background: #fff0f0;
+            color: #d9534f;
             border: 2px solid #f5c6cb;
+            transition: all 0.3s;
         }
 
-        .timestamp-status.saved {
+        .save-status-large.active {
+            background: #eafff0;
             color: var(--pro-green);
-            background: #f0fff4;
             border-color: #c3e6cb;
         }
 
         /* Subject Box */
-        .subject-row {
-            margin-bottom: 20px;
-        }
-
-        .subject-row label {
-            font-weight: bold;
-            color: var(--pro-blue);
-            display: block;
-            margin-bottom: 8px;
+        .subject-container {
+            margin-bottom: 25px;
         }
 
         #email-title {
             width: 100%;
-            padding: 12px;
-            font-size: 18px;
+            padding: 15px;
+            font-size: 20px;
             border: 2px solid var(--border);
             border-radius: 6px;
-            box-sizing: border-box;
+            outline-color: var(--pro-blue);
+            font-weight: bold;
         }
 
-        /* Dual Editor Workspace */
+        /* Workspace Layout: Left (Code) | Right (Visual) */
         .workspace {
             display: flex;
             gap: 20px;
-            height: 600px;
+            height: 650px;
             margin-bottom: 25px;
         }
 
-        .editor-pane {
+        .pane {
             flex: 1;
             display: flex;
             flex-direction: column;
             border: 2px solid var(--border);
             border-radius: 8px;
+            background: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .pane-title {
+            background: var(--pro-blue);
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        /* HTML Editor Styles (Notepad++ Mimic) */
+        .code-container {
+            position: relative;
+            flex: 1;
+            background: #ffffff;
             overflow: hidden;
         }
 
-        .pane-label {
-            background: var(--pro-blue);
-            color: white;
-            padding: 8px 15px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
+        #html-input, #html-highlight {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            margin: 0; padding: 15px;
+            box-sizing: border-box;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            border: none;
+            overflow-y: auto;
         }
 
-        /* WYSIWYG Toolbar */
-        .toolbar {
+        #html-input {
+            color: transparent;
+            background: transparent;
+            caret-color: black;
+            z-index: 2;
+            resize: none;
+            outline: none;
+        }
+
+        #html-highlight {
+            z-index: 1;
+            color: #333;
+            pointer-events: none;
+        }
+
+        /* Syntax colors */
+        .token-tag { color: var(--syn-tag); font-weight: bold; }
+        .token-attr { color: var(--syn-attr); }
+        .token-val { color: var(--syn-val); }
+        .token-comm { color: var(--syn-comm); font-style: italic; }
+
+        /* Visual Editor Styles */
+        .wysiwyg-toolbar {
             background: #f8f9fa;
-            padding: 5px;
             border-bottom: 1px solid var(--border);
+            padding: 8px;
             display: flex;
             gap: 5px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
-        .toolbar button {
-            padding: 5px 10px;
+        .wysiwyg-toolbar button, .wysiwyg-toolbar select {
+            padding: 5px 8px;
+            border: 1px solid #ccc;
+            background: #fff;
             cursor: pointer;
-            background: white;
-            border: 1px solid var(--border);
             border-radius: 3px;
             font-weight: bold;
         }
 
-        .toolbar button:hover { background: #e2e6ea; }
+        .wysiwyg-toolbar input[type="color"] {
+            border: none;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            background: none;
+        }
 
-        /* Editing Areas */
         #visual-editor {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
             outline: none;
-            background: white;
+            background: #fff;
         }
 
-        #html-editor {
-            flex: 1;
-            padding: 15px;
-            font-family: 'Consolas', monospace;
-            font-size: 14px;
-            border: none;
-            resize: none;
-            background: #272822;
-            color: #f8f8f2;
-            outline: none;
-        }
-
-        /* Buttons Section */
-        .action-bar {
-            display: flex;
+        /* Action Buttons */
+        .footer-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 15px;
-            margin-bottom: 20px;
         }
 
         .btn {
-            flex: 1;
             padding: 15px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             text-transform: uppercase;
             transition: 0.2s;
-            text-align: center;
-            text-decoration: none;
         }
 
-        .btn-blue { background-color: var(--pro-blue); color: white; }
-        .btn-blue:hover { background-color: var(--pro-blue-hover); }
+        .btn-blue { background: var(--pro-blue); color: white; }
+        .btn-blue:hover { background: var(--pro-blue-hover); }
+        .btn-green { background: var(--pro-green); color: white; }
+        .btn-green:hover { background: var(--pro-green-hover); }
+        .btn-grey { background: #6c757d; color: white; }
 
-        .btn-green { background-color: var(--pro-green); color: white; }
-        .btn-green:hover { background-color: var(--pro-green-hover); }
-
-        .btn-secondary { background-color: #6c757d; color: white; }
-
-        footer {
-            margin-top: 40px;
-            border-top: 1px solid var(--border);
+        /* Bottom Login */
+        .mlgs-footer {
+            margin-top: 30px;
+            text-align: center;
             padding-top: 20px;
-            text-align: center;
+            border-top: 1px solid #eee;
         }
 
-        .mlgs-link {
+        .btn-mlgs {
             display: inline-block;
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background-color: var(--pro-green);
+            padding: 20px 60px;
+            background: var(--pro-green);
             color: white;
             text-decoration: none;
-            border-radius: 8px;
             font-weight: 900;
-            font-size: 20px;
-            box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3);
+            font-size: 22px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(40,167,69,0.4);
         }
     </style>
 </head>
@@ -212,159 +243,190 @@
 
 <div class="main-container">
     <header>
-        <h1>MLGS Content Hub</h1>
-        <div id="timestamp" class="timestamp-status">LAST SAVED: NEVER</div>
+        <div class="brand-section">
+            <h1>MLGS CONTENT HUB</h1>
+        </div>
+        <div id="save-status" class="save-status-large">
+            LAST SAVED: NEVER
+        </div>
     </header>
 
-    <div class="subject-row">
-        <label>Email Subject / Document Title</label>
-        <input type="text" id="email-title" placeholder="Enter your subject line here...">
+    <div class="subject-container">
+        <input type="text" id="email-title" placeholder="Enter Subject Line / File Title..." oninput="autoSaveToBrowser()">
     </div>
 
     <div class="workspace">
-        <!-- LEFT SIDE: WYSIWYG PREVIEW -->
-        <div class="editor-pane">
-            <div class="pane-label">Visual Editor (Live Preview)</div>
-            <div class="toolbar">
-                <button onclick="execCmd('bold')">B</button>
-                <button onclick="execCmd('italic')">I</button>
-                <button onclick="execCmd('underline')">U</button>
-                <button onclick="execCmd('justifyLeft')">Left</button>
-                <button onclick="execCmd('justifyCenter')">Center</button>
-                <button onclick="execCmd('insertUnorderedList')">• List</button>
-                <button onclick="execCmd('createLink', prompt('Enter URL:'))">Link</button>
-                <button onclick="execCmd('formatBlock', 'h1')">H1</button>
-                <button onclick="execCmd('formatBlock', 'h2')">H2</button>
-                <button onclick="execCmd('removeFormat')">Clear</button>
+        <!-- LEFT: HTML SOURCE (Syntax Highlighted) -->
+        <div class="pane">
+            <div class="pane-title">HTML Code (Notepad++ Style)</div>
+            <div class="code-container">
+                <div id="html-highlight"></div>
+                <textarea id="html-input" spellcheck="false" oninput="updateFromCode()" onscroll="syncScroll()"></textarea>
             </div>
-            <div id="visual-editor" contenteditable="true" oninput="syncToHtml()"></div>
         </div>
 
-        <!-- RIGHT SIDE: HTML SOURCE -->
-        <div class="editor-pane">
-            <div class="pane-label">
-                HTML Source Code
-                <span style="font-weight: normal; font-size: 11px; opacity: 0.8;">Auto-syncs to Preview</span>
+        <!-- RIGHT: VISUAL EDITOR -->
+        <div class="pane">
+            <div class="pane-title">Visual Editor (What You See Is What You Get)</div>
+            <div class="wysiwyg-toolbar">
+                <button onclick="cmd('bold')">B</button>
+                <button onclick="cmd('italic')">I</button>
+                <button onclick="cmd('underline')">U</button>
+                <select onchange="cmd('formatBlock', this.value); this.selectedIndex=0;">
+                    <option value="">Style</option>
+                    <option value="H1">Heading 1</option>
+                    <option value="H2">Heading 2</option>
+                    <option value="P">Paragraph</option>
+                </select>
+                <select onchange="cmd('fontSize', this.value); this.selectedIndex=0;">
+                    <option value="">Size</option>
+                    <option value="1">Small</option>
+                    <option value="3">Normal</option>
+                    <option value="5">Large</option>
+                    <option value="7">Huge</option>
+                </select>
+                <label style="font-size: 11px; margin-left: 5px;">Text Color:</label>
+                <input type="color" oninput="cmd('foreColor', this.value)">
+                <button onclick="cmd('createLink', prompt('URL:'))">Link</button>
+                <button onclick="cmd('insertUnorderedList')">• List</button>
+                <button onclick="cmd('justifyLeft')">L</button>
+                <button onclick="cmd('justifyCenter')">C</button>
+                <button onclick="cmd('removeFormat')">CLR</button>
             </div>
-            <textarea id="html-editor" oninput="syncToVisual()" placeholder="Paste HTML code here..."></textarea>
+            <div id="visual-editor" contenteditable="true" oninput="updateFromVisual()"></div>
         </div>
     </div>
 
-    <div class="action-bar">
-        <button class="btn btn-green" onclick="saveToPC()">Save Content (.html)</button>
-        <button class="btn btn-blue" onclick="saveToBrowser()">Save to Browser</button>
-        <button class="btn btn-blue" onclick="document.getElementById('file-input').click()">Load from PC</button>
-        <button class="btn btn-secondary" onclick="copyCode()">Copy HTML</button>
+    <div class="footer-actions">
+        <button class="btn btn-green" onclick="downloadFile()">Download HTML File</button>
+        <button class="btn btn-blue" onclick="manualSave()">Save to Browser</button>
+        <button class="btn btn-blue" onclick="document.getElementById('file-loader').click()">Load File from PC</button>
+        <button class="btn btn-grey" onclick="copyCode()">Copy HTML Code</button>
     </div>
 
-    <input type="file" id="file-input" style="display:none" accept=".html">
+    <input type="file" id="file-loader" style="display:none" accept=".html">
 
-    <footer>
-        <a href="https://www.myleadgenserect.com/login" target="_blank" class="mlgs-link">OPEN MLGS LOGIN</a>
-    </footer>
+    <div class="mlgs-footer">
+        <a href="https://www.myleadgenserect.com/login" target="_blank" class="btn-mlgs">OPEN MLGS LOGIN</a>
+    </div>
 </div>
 
 <script>
+    const htmlInput = document.getElementById('html-input');
+    const htmlHighlight = document.getElementById('html-highlight');
     const visualEditor = document.getElementById('visual-editor');
-    const htmlEditor = document.getElementById('html-editor');
     const emailTitle = document.getElementById('email-title');
-    const timestampBox = document.getElementById('timestamp');
-    const fileInput = document.getElementById('file-input');
+    const saveStatus = document.getElementById('save-status');
+    const fileLoader = document.getElementById('file-loader');
 
-    // 1. WYSIWYG Command Function
-    function execCmd(command, value = null) {
+    // 1. Core Logic: Syntax Highlighting Engine
+    function applyHighlighting(code) {
+        // Simple Regex for HTML tags, attributes, and strings
+        let escaped = code
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+        // Highlight tags
+        escaped = escaped.replace(/&lt;(\/?[a-z1-6]+)(.*?)&gt;/gi, (match, tag, attrs) => {
+            // Highlight attributes inside the tag
+            let highlightedAttrs = attrs.replace(/([a-z-]+)=(['"].*?['"])/gi, 
+                '<span class="token-attr">$1</span>=<span class="token-val">$2</span>');
+            return `<span class="token-tag">&lt;${tag}</span>${highlightedAttrs}<span class="token-tag">&gt;</span>`;
+        });
+
+        // Highlight comments
+        escaped = escaped.replace(/&lt;!--([\s\S]*?)--&gt;/g, '<span class="token-comm">&lt;!--$1--&gt;</span>');
+
+        htmlHighlight.innerHTML = escaped + "\n";
+    }
+
+    // 2. Sync Logic
+    function updateFromCode() {
+        const code = htmlInput.value;
+        applyHighlighting(code);
+        visualEditor.innerHTML = code;
+        autoSaveToBrowser();
+    }
+
+    function updateFromVisual() {
+        const code = visualEditor.innerHTML;
+        htmlInput.value = code;
+        applyHighlighting(code);
+        autoSaveToBrowser();
+    }
+
+    function syncScroll() {
+        htmlHighlight.scrollTop = htmlInput.scrollTop;
+    }
+
+    // 3. WYSIWYG Commands
+    function cmd(command, value = null) {
         document.execCommand(command, false, value);
-        syncToHtml();
+        updateFromVisual();
     }
 
-    // 2. Sync Logic: Visual -> HTML
-    function syncToHtml() {
-        htmlEditor.value = visualEditor.innerHTML;
-        autoSave();
-    }
-
-    // 3. Sync Logic: HTML -> Visual
-    function syncToVisual() {
-        visualEditor.innerHTML = htmlEditor.value;
-        autoSave();
-    }
-
-    // 4. Save to Browser (LocalStorage)
-    function saveToBrowser() {
+    // 4. Persistence (Browser Storage)
+    function autoSaveToBrowser() {
         const data = {
             title: emailTitle.value,
-            content: htmlEditor.value,
-            time: new Date().toLocaleString()
+            html: htmlInput.value
         };
-        localStorage.setItem('mlgs_hub_data', JSON.stringify(data));
-        updateTimestamp(data.time);
-        alert('Saved to browser storage!');
+        localStorage.setItem('mlgs_pro_cache', JSON.stringify(data));
     }
 
-    function autoSave() {
-        // Silent save to browser for crash protection
-        const data = {
-            title: emailTitle.value,
-            content: htmlEditor.value,
-            time: localStorage.getItem('mlgs_hub_time') || "Draft"
-        };
-        localStorage.setItem('mlgs_hub_data', JSON.stringify(data));
+    function manualSave() {
+        autoSaveToBrowser();
+        const now = new Date().toLocaleTimeString();
+        localStorage.setItem('mlgs_pro_time', now);
+        saveStatus.innerText = `LAST SAVED: ${now}`;
+        saveStatus.classList.add('active');
+        alert("Work saved successfully to your browser.");
     }
 
-    // 5. Save to PC (Download)
-    function saveToPC() {
-        const content = htmlEditor.value;
-        const filename = (emailTitle.value || 'mlgs-email') + '.html';
-        const blob = new Blob([content], {type: 'text/html'});
-        const link = document.createElement('a');
-        
-        link.href = window.URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-
-        const now = new Date().toLocaleString();
-        updateTimestamp(now);
-        localStorage.setItem('mlgs_hub_time', now);
-        saveToBrowser();
+    // 5. File Operations
+    function downloadFile() {
+        const blob = new Blob([htmlInput.value], { type: 'text/html' });
+        const a = document.createElement('a');
+        const filename = (emailTitle.value || 'mlgs-template') + '.html';
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        manualSave();
     }
 
-    // 6. Load from PC
-    fileInput.onchange = e => {
+    fileLoader.onchange = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
-        reader.onload = event => {
-            htmlEditor.value = event.target.result;
-            visualEditor.innerHTML = event.target.result;
+        reader.onload = (event) => {
+            const content = event.target.result;
+            htmlInput.value = content;
             emailTitle.value = file.name.replace('.html', '');
-            updateTimestamp("FILE LOADED");
+            updateFromCode();
         };
         reader.readAsText(file);
     };
 
-    // 7. Utility Functions
-    function updateTimestamp(time) {
-        timestampBox.innerText = `LAST SAVED: ${time}`;
-        timestampBox.classList.add('saved');
-    }
-
     function copyCode() {
-        htmlEditor.select();
-        document.execCommand('copy');
-        alert('HTML Code copied to clipboard!');
+        navigator.clipboard.writeText(htmlInput.value);
+        alert("HTML code copied to clipboard!");
     }
 
-    // 8. On Page Load: Retrieve Data
+    // 6. Initialization
     window.onload = () => {
-        const savedData = localStorage.getItem('mlgs_hub_data');
-        if (savedData) {
-            const parsed = JSON.parse(savedData);
-            emailTitle.value = parsed.title || "";
-            htmlEditor.value = parsed.content || "";
-            visualEditor.innerHTML = parsed.content || "";
-            if(parsed.time) updateTimestamp(parsed.time);
+        const cache = localStorage.getItem('mlgs_pro_cache');
+        const lastTime = localStorage.getItem('mlgs_pro_time');
+        if (cache) {
+            const data = JSON.parse(cache);
+            emailTitle.value = data.title || "";
+            htmlInput.value = data.html || "";
+            updateFromCode();
+        }
+        if (lastTime) {
+            saveStatus.innerText = `LAST SAVED: ${lastTime}`;
+            saveStatus.classList.add('active');
         }
     };
-
 </script>
 
 </body>
