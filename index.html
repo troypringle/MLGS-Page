@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLGS Content Hub - Pro Edition</title>
+    <title>MLGS Content Hub - Professional Edition</title>
     <style>
         :root {
             --pro-blue: #0056b3;
@@ -42,56 +42,39 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 4px solid var(--pro-blue);
-            padding-bottom: 20px;
-            margin-bottom: 25px;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        h1 {
-            margin: 0;
-            color: var(--pro-blue);
-            font-size: 32px;
+        h1 { margin: 0; color: var(--pro-blue); font-size: 28px; font-weight: 900; text-transform: uppercase; }
+
+        /* Top Notification Box */
+        #top-timer-banner {
+            font-size: 22px;
             font-weight: 900;
-            text-transform: uppercase;
+            padding: 10px 20px;
+            border-radius: 6px;
+            background: #eee;
+            color: #555;
         }
 
-        .status-badge {
-            font-size: 26px;
-            font-weight: 900;
-            padding: 12px 30px;
-            border-radius: 8px;
-            background: #fff5f5;
-            color: #d9534f;
-            border: 2px solid #f5c6cb;
-            transition: 0.3s ease;
-        }
+        .subject-row { margin-bottom: 20px; }
 
-        .status-badge.saved {
-            background: #eafff0;
-            color: var(--pro-green);
-            border-color: #c3e6cb;
-        }
-
-        .subject-row {
-            margin-bottom: 25px;
-        }
-
-        /* Bitwarden protection: unique ID and autocomplete off */
         #mlgs-subject-field-unique {
             width: 100%;
-            padding: 18px;
-            font-size: 22px;
+            padding: 15px;
+            font-size: 20px;
             font-weight: bold;
             border: 2px solid var(--border);
             border-radius: 8px;
             background: #fdfdfd;
-            outline-color: var(--pro-blue);
         }
 
         .workspace {
             display: flex;
-            gap: 25px;
-            height: 650px;
-            margin-bottom: 25px;
+            gap: 20px;
+            height: 600px;
+            margin-bottom: 20px;
         }
 
         .pane {
@@ -107,61 +90,24 @@
         .pane-header {
             background: var(--pro-blue);
             color: white;
-            padding: 12px 18px;
+            padding: 10px 15px;
             font-weight: bold;
             text-transform: uppercase;
-            font-size: 13px;
+            font-size: 12px;
         }
 
-        /* Visual Pane (Left) */
-        .wysiwyg-toolbar {
-            background: #f8f9fa;
-            border-bottom: 1px solid var(--border);
-            padding: 10px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
+        /* Editors */
+        .wysiwyg-toolbar { background: #f8f9fa; border-bottom: 1px solid var(--border); padding: 8px; display: flex; gap: 5px; }
+        .wysiwyg-toolbar button, .wysiwyg-toolbar select { padding: 5px 10px; font-weight: bold; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
 
-        .wysiwyg-toolbar button, .wysiwyg-toolbar select {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            background: white;
-            cursor: pointer;
-            font-weight: bold;
-            border-radius: 4px;
-        }
+        #visual-view { flex: 1; padding: 20px; overflow-y: auto; outline: none; background: white; font-size: 16px; }
 
-        #visual-view {
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-            outline: none;
-            background: white;
-            font-size: 16px;
-        }
-
-        /* HTML Pane (Right) */
-        .code-container {
-            position: relative;
-            flex: 1;
-            overflow: hidden;
-        }
-
+        .code-container { position: relative; flex: 1; overflow: hidden; }
         #html-raw, #html-colored {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            margin: 0; padding: 20px;
-            font-family: 'Consolas', monospace;
-            font-size: 15px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            box-sizing: border-box;
-            border: none;
-            overflow-y: auto;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            margin: 0; padding: 20px; font-family: 'Consolas', monospace; font-size: 14px;
+            line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; box-sizing: border-box; border: none; overflow-y: auto;
         }
-
         #html-raw { color: transparent; background: transparent; caret-color: black; z-index: 2; outline: none; resize: none;}
         #html-colored { z-index: 1; color: #333; pointer-events: none; }
 
@@ -170,46 +116,45 @@
         .val { color: var(--syn-val); }
         .mlgs-var { color: white; background: var(--syn-token); padding: 0 3px; border-radius: 3px; font-weight: bold; }
 
-        .action-bar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 40px;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 18px;
-            font-size: 16px;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            text-transform: uppercase;
-            text-align: center;
-            text-decoration: none;
-            transition: 0.2s;
-        }
-
-        .btn-main { flex: 2; padding: 22px; font-size: 18px; }
-        .btn-sub { flex: 1; font-size: 14px; }
+        /* Action Buttons */
+        .action-bar { display: flex; gap: 10px; margin-bottom: 25px; }
+        .btn { padding: 15px; font-size: 14px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; text-align: center; text-decoration: none; transition: 0.2s; flex: 1; }
         .btn-green { background: var(--pro-green); color: white; }
         .btn-blue { background: var(--pro-blue); color: white; }
         .btn-grey { background: #6c757d; color: white; }
-        .btn:hover { opacity: 0.95; transform: translateY(-1px); }
 
+        /* FOOTER / TIMER SECTION */
         footer {
-            border-top: 2px solid #eee;
-            padding-top: 30px;
+            border-top: 3px solid var(--pro-blue);
+            padding-top: 25px;
             display: flex;
+            flex-direction: column;
             gap: 20px;
         }
 
-        .btn-footer {
-            flex: 1;
-            padding: 25px;
-            font-size: 26px;
-            font-weight: 900;
+        .timer-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr;
+            gap: 20px;
+            align-items: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
         }
+
+        .timer-display-box { text-align: center; border-right: 2px solid #eee; }
+        .timer-val { font-size: 32px; font-weight: 900; color: #d9534f; display: block; }
+        .timer-label { font-size: 12px; font-weight: bold; color: #777; text-transform: uppercase; }
+
+        .manual-override-box { display: flex; flex-direction: column; gap: 8px; }
+        .manual-override-box label { font-size: 12px; font-weight: bold; color: var(--pro-blue); }
+        .manual-override-box input { padding: 10px; border: 1px solid var(--border); border-radius: 5px; font-weight: bold; }
+
+        .footer-buttons { display: flex; gap: 15px; }
+        .btn-huge { flex: 1; padding: 25px; font-size: 24px; font-weight: 900; }
+
+        .ready { color: var(--pro-green) !important; }
     </style>
 </head>
 <body>
@@ -217,44 +162,30 @@
 <div class="main-hub">
     <header>
         <h1>MLGS Content Hub</h1>
-        <div id="save-status-box" class="status-badge">LAST SAVED: NEVER</div>
+        <div id="top-timer-banner">READY TO MAIL</div>
     </header>
 
     <div class="subject-row">
-        <input type="text" id="mlgs-subject-field-unique" 
-               placeholder="Subject Line / Email Title..." 
-               autocomplete="off" 
-               data-lpignore="true">
+        <input type="text" id="mlgs-subject-field-unique" placeholder="Subject Line / Email Title..." autocomplete="off" data-lpignore="true">
     </div>
 
     <div class="workspace">
-        <!-- LEFT: VISUAL (PREVIEW) -->
+        <!-- LEFT: VISUAL -->
         <div class="pane">
             <div class="pane-header">Visual Editor & Preview</div>
             <div class="wysiwyg-toolbar">
                 <button onclick="exec('bold')">B</button>
                 <button onclick="exec('italic')">I</button>
                 <button onclick="exec('underline')">U</button>
-                <select onchange="exec('fontSize', this.value); this.selectedIndex=0;">
-                    <option value="">Size</option>
-                    <option value="3">Small</option>
-                    <option value="4">Normal</option>
-                    <option value="5">Large</option>
-                    <option value="7">Huge</option>
-                </select>
+                <select onchange="exec('fontSize', this.value); this.selectedIndex=0;"><option value="">Size</option><option value="3">Small</option><option value="4">Normal</option><option value="5">Large</option><option value="7">Huge</option></select>
                 <input type="color" oninput="exec('foreColor', this.value)" title="Color">
                 <button onclick="exec('createLink', prompt('URL:'))">Link</button>
-                <button onclick="exec('insertImage', prompt('Image URL:'))">Img</button>
-                <button onclick="exec('removeFormat')">Clear Style</button>
+                <button onclick="exec('removeFormat')">Clear</button>
             </div>
-            <div id="visual-view" contenteditable="true" 
-                 oninput="syncFromVisual()" 
-                 onmouseup="syncSelectionToCode()" 
-                 onkeyup="syncSelectionToCode()">
-            </div>
+            <div id="visual-view" contenteditable="true" oninput="syncFromVisual()" onmouseup="syncSelectionToCode()" onkeyup="syncSelectionToCode()"></div>
         </div>
 
-        <!-- RIGHT: HTML (NOTEPAD++) -->
+        <!-- RIGHT: HTML -->
         <div class="pane">
             <div class="pane-header">HTML Source Code</div>
             <div class="code-container">
@@ -265,17 +196,36 @@
     </div>
 
     <div class="action-bar">
-        <button class="btn btn-green btn-main" onclick="downloadHTML()">Save & Download File</button>
-        <button class="btn btn-blue btn-main" onclick="restoreCheckpoint()">Restore Last Download</button>
-        <button class="btn btn-grey btn-sub" onclick="document.getElementById('file-input').click()">Browse PC Files</button>
-        <button class="btn btn-grey btn-sub" onclick="copyHTML()">Copy HTML Source</button>
+        <button class="btn btn-green" onclick="downloadHTML()">Save & Download</button>
+        <button class="btn btn-blue" onclick="restoreCheckpoint()">Restore Last Download</button>
+        <button class="btn btn-grey" onclick="document.getElementById('file-input').click()">Browse PC Files</button>
+        <button class="btn btn-grey" onclick="copyHTML()">Copy HTML</button>
     </div>
-
     <input type="file" id="file-input" style="display:none" accept=".html">
 
     <footer>
-        <a href="https://www.myleadgenserect.com/login" target="_blank" class="btn btn-green btn-footer">OPEN MLGS LOGIN</a>
-        <button class="btn btn-blue btn-footer" onclick="manualLogTime()">UPDATE TIME / DATE</button>
+        <div class="timer-grid">
+            <div class="timer-display-box">
+                <span class="timer-label">Next Mailing Available In:</span>
+                <span id="countdown-timer" class="timer-val">00:00:00</span>
+            </div>
+            
+            <div class="timer-display-box">
+                <span class="timer-label">Last Action Recorded:</span>
+                <span id="last-saved-time" style="font-weight: bold; font-size: 14px; margin-top: 10px; display: block;">NEVER</span>
+            </div>
+
+            <div class="manual-override-box">
+                <label>Manual Time Override:</label>
+                <input type="datetime-local" id="manual-time-input">
+                <button class="btn btn-blue" style="padding: 5px; font-size: 11px;" onclick="applyManualTime()">Apply Override</button>
+            </div>
+        </div>
+
+        <div class="footer-buttons">
+            <a href="https://www.myleadgenserect.com/login" target="_blank" class="btn btn-green btn-huge">OPEN MLGS LOGIN</a>
+            <button class="btn btn-blue btn-huge" onclick="manualLogTime()">UPDATE TIME / DATE NOW</button>
+        </div>
     </footer>
 </div>
 
@@ -284,27 +234,12 @@
     const htmlRaw = document.getElementById('html-raw');
     const htmlColored = document.getElementById('html-colored');
     const titleInput = document.getElementById('mlgs-subject-field-unique');
-    const statusBox = document.getElementById('save-status-box');
     const fileInput = document.getElementById('file-input');
+    const countdownDisplay = document.getElementById('countdown-timer');
+    const lastSavedDisplay = document.getElementById('last-saved-time');
+    const topBanner = document.getElementById('top-timer-banner');
 
-    // Selection Sync
-    function syncSelectionToCode() {
-        const selection = window.getSelection();
-        const selectedText = selection.toString().trim();
-        if (selectedText.length > 2) {
-            const code = htmlRaw.value;
-            const index = code.indexOf(selectedText);
-            if (index !== -1) {
-                htmlRaw.focus();
-                htmlRaw.setSelectionRange(index, index + selectedText.length);
-                const linesBefore = code.substr(0, index).split("\n").length;
-                htmlRaw.scrollTop = (linesBefore - 5) * 22; 
-            }
-        }
-        autoSave();
-    }
-
-    // Syntax Highlighting
+    // 1. Core Sync Logic
     function applySyntax(code) {
         let escaped = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         escaped = escaped.replace(/&lt;(\/?[a-z1-6]+)(.*?)&gt;/gi, (match, tag, attrs) => {
@@ -315,66 +250,94 @@
         htmlColored.innerHTML = escaped + "\n";
     }
 
-    // Sync Logic
-    function syncFromCode() {
-        applySyntax(htmlRaw.value);
-        visualView.innerHTML = htmlRaw.value;
-        autoSave();
-    }
-
-    function syncFromVisual() {
-        htmlRaw.value = visualView.innerHTML;
-        applySyntax(htmlRaw.value);
-        autoSave();
-    }
-
+    function syncFromCode() { applySyntax(htmlRaw.value); visualView.innerHTML = htmlRaw.value; autoSave(); }
+    function syncFromVisual() { htmlRaw.value = visualView.innerHTML; applySyntax(htmlRaw.value); autoSave(); }
     function syncCodeScroll() { htmlColored.scrollTop = htmlRaw.scrollTop; }
     function exec(cmd, val = null) { document.execCommand(cmd, false, val); syncFromVisual(); }
-
-    // Persistence
-    function autoSave() {
-        const data = {
-            title: titleInput.value,
-            content: htmlRaw.value
-        };
-        localStorage.setItem('mlgs_current_session', JSON.stringify(data));
+    function syncSelectionToCode() {
+        const selection = window.getSelection();
+        const selectedText = selection.toString().trim();
+        if (selectedText.length > 2) {
+            const code = htmlRaw.value;
+            const index = code.indexOf(selectedText);
+            if (index !== -1) {
+                htmlRaw.focus();
+                htmlRaw.setSelectionRange(index, index + selectedText.length);
+                htmlRaw.scrollTop = (code.substr(0, index).split("\n").length - 5) * 22; 
+            }
+        }
     }
 
+    // 2. Mailing Timer Logic
+    function updateMailingTimer() {
+        const lastSavedTimestamp = parseInt(localStorage.getItem('mlgs_timestamp_ms'));
+        if (!lastSavedTimestamp) {
+            countdownDisplay.innerText = "00:00:00";
+            topBanner.innerText = "READY TO MAIL";
+            return;
+        }
+
+        const waitPeriod = 23 * 60 * 60 * 1000; // 23 Hours
+        const nextMailTime = lastSavedTimestamp + waitPeriod;
+        const now = Date.now();
+        const diff = nextMailTime - now;
+
+        if (diff <= 0) {
+            countdownDisplay.innerText = "00:00:00";
+            countdownDisplay.classList.add('ready');
+            topBanner.innerText = "READY TO MAIL";
+            topBanner.style.background = "#eafff0";
+            topBanner.style.color = "#28a745";
+        } else {
+            countdownDisplay.classList.remove('ready');
+            const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+            const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+            const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+            countdownDisplay.innerText = `${h}:${m}:${s}`;
+            topBanner.innerText = `NEXT MAIL IN: ${h}:${m}:${s}`;
+            topBanner.style.background = "#fff5f5";
+            topBanner.style.color = "#d9534f";
+        }
+    }
+
+    // 3. Time Controls
     function manualLogTime() {
-        const now = new Date().toLocaleString();
-        localStorage.setItem('mlgs_last_timestamp', now);
-        updateStatusDisplay(now);
+        const now = Date.now();
+        saveTimestamp(now);
     }
 
-    function updateStatusDisplay(time) {
-        statusBox.innerText = `LAST SAVED: ${time}`;
-        statusBox.classList.add('saved');
+    function applyManualTime() {
+        const inputVal = document.getElementById('manual-time-input').value;
+        if (!inputVal) return alert("Select a date and time first!");
+        const manualMs = new Date(inputVal).getTime();
+        saveTimestamp(manualMs);
+        alert("Manual time override applied!");
     }
 
-    // The Download function now strictly uses the input title
+    function saveTimestamp(ms) {
+        localStorage.setItem('mlgs_timestamp_ms', ms);
+        const dateString = new Date(ms).toLocaleString();
+        localStorage.setItem('mlgs_last_timestamp_str', dateString);
+        lastSavedDisplay.innerText = dateString;
+        updateMailingTimer();
+    }
+
+    // 4. File Operations
+    function autoSave() {
+        localStorage.setItem('mlgs_session', JSON.stringify({ title: titleInput.value, content: htmlRaw.value }));
+    }
+
     function downloadHTML() {
         const userTitle = titleInput.value.trim() || 'mlgs-email';
-        const code = htmlRaw.value;
-        
-        const checkpoint = {
-            title: userTitle,
-            content: code,
-            time: new Date().toLocaleString()
-        };
-        
-        // Save this exact version as the checkpoint
-        localStorage.setItem('mlgs_checkpoint', JSON.stringify(checkpoint));
-        
-        const blob = new Blob([code], { type: 'text/html' });
+        localStorage.setItem('mlgs_checkpoint', JSON.stringify({ title: userTitle, content: htmlRaw.value }));
+        const blob = new Blob([htmlRaw.value], { type: 'text/html' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = userTitle + '.html';
         a.click();
-        
         manualLogTime();
     }
 
-    // Restore the one we JUST saved to memory
     function restoreCheckpoint() {
         const saved = localStorage.getItem('mlgs_checkpoint');
         if (saved) {
@@ -382,9 +345,6 @@
             titleInput.value = data.title;
             htmlRaw.value = data.content;
             syncFromCode();
-            alert("Restored: " + data.title);
-        } else {
-            alert("No download history found.");
         }
     }
 
@@ -394,6 +354,23 @@
         alert("HTML Copied!");
     }
 
+    // 5. App Initialization
+    window.onload = () => {
+        const session = localStorage.getItem('mlgs_session');
+        if (session) {
+            const data = JSON.parse(session);
+            titleInput.value = data.title || "";
+            htmlRaw.value = data.content || "";
+            syncFromCode();
+        }
+        const lastStr = localStorage.getItem('mlgs_last_timestamp_str');
+        if (lastStr) lastSavedDisplay.innerText = lastStr;
+        
+        setInterval(updateMailingTimer, 1000);
+        updateMailingTimer();
+    };
+
+    titleInput.addEventListener('input', autoSave);
     fileInput.onchange = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
@@ -404,21 +381,6 @@
         };
         reader.readAsText(file);
     };
-
-    window.onload = () => {
-        const session = localStorage.getItem('mlgs_current_session');
-        if (session) {
-            const data = JSON.parse(session);
-            // Ensure no generic "Backup" text overwrites your session title
-            titleInput.value = data.title || "";
-            htmlRaw.value = data.content || "";
-            syncFromCode();
-        }
-        const lastTime = localStorage.getItem('mlgs_last_timestamp');
-        if (lastTime) updateStatusDisplay(lastTime);
-    };
-
-    titleInput.addEventListener('input', autoSave);
 </script>
 </body>
 </html>
