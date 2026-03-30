@@ -16,86 +16,59 @@
             overflow: hidden;
         }
 
-        /* HEADER & TOP CONTROLS */
         .top-container {
-            background: #1e1e1e;
-            padding: 20px;
-            border-bottom: 2px solid #007bff;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            background: #1e1e1e; padding: 20px;
+            border-bottom: 2px solid #007bff; display: flex; flex-direction: column; gap: 15px;
         }
         
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        h1 {
-            text-transform: uppercase;
-            font-weight: 900;
-            margin: 0;
-            font-size: 28px;
-            color: #fff;
-        }
+        .header-row { display: flex; justify-content: space-between; align-items: center; }
+        h1 { text-transform: uppercase; font-weight: 900; margin: 0; font-size: 28px; color: #fff; }
 
         .timestamp-box {
-            background: #000;
-            padding: 15px 25px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffff00;
-            border: 2px solid #333;
-            text-align: center;
+            background: #000; padding: 15px 25px; border-radius: 8px; font-size: 18px;
+            font-weight: bold; color: #ffff00; border: 2px solid #333; text-align: center;
         }
 
         .action-bar { display: flex; gap: 10px; }
         .btn {
-            padding: 12px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.2s;
+            padding: 12px 20px; font-size: 14px; font-weight: bold; border: none;
+            border-radius: 6px; cursor: pointer; text-transform: uppercase; transition: 0.2s;
         }
         .btn-load { background: #17a2b8; color: white; }
         .btn-save { background: #28a745; color: white; }
         .btn-save:hover { background-color: #218838; }
-        .btn-gh { background: #6f42c1; color: white; }
         .btn-copy { background: #007bff; color: white; }
 
-        /* SUBJECT LINE INPUT */
         .subject-section { display: flex; align-items: center; gap: 15px; }
         label { font-weight: bold; font-size: 16px; color: #007bff; white-space: nowrap; }
         input[type="text"] {
             flex: 1; padding: 12px; font-size: 16px; border: 1px solid #444;
-            border-radius: 6px; background-color: #252525; color: #fff;
-            font-family: 'Segoe UI', sans-serif; outline: none;
+            border-radius: 6px; background-color: #252525; color: #fff; outline: none;
         }
         input[type="text"]:focus { border-color: #007bff; }
 
-        /* WORKSPACE (SPLIT SCREEN) */
         .workspace { flex: 1; display: flex; width: 100%; }
         .panel { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #333; }
         
+        /* ADVANCED TOOLBAR */
         .toolbar {
-            background: #333; padding: 10px; display: flex; gap: 8px;
-            border-bottom: 1px solid #444; align-items: center;
+            background: #e9ecef; padding: 8px 10px; display: flex; gap: 6px;
+            border-bottom: 1px solid #ccc; align-items: center; flex-wrap: wrap;
         }
+        .toolbar-code { background: #333; border-bottom: 1px solid #444; color: white; }
+        
         .fmt-btn {
             background: #fff; color: #000; border: 1px solid #ccc;
-            padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold;
+            padding: 5px 10px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 14px;
         }
         .fmt-btn:hover { background: #e2e2e2; }
+        .fmt-select { padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
+        .color-picker-wrapper { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #333; font-weight: bold; }
+        input[type="color"] { width: 30px; height: 25px; border: 1px solid #ccc; cursor: pointer; padding: 0; }
 
-        /* THE EDITORS */
         #email-body {
-            flex: 1; background-color: #252525; color: #00ff00; /* Matrix Green */
-            padding: 20px; font-size: 16px; border: none; outline: none; resize: none;
+            flex: 1; background-color: #252525; color: #00ff00; padding: 20px;
+            font-size: 16px; border: none; outline: none; resize: none;
             font-family: 'Consolas', 'Courier New', monospace; line-height: 1.5;
         }
 
@@ -107,12 +80,14 @@
 </head>
 <body>
 
+<input type="file" id="file-loader" style="display:none" accept=".html" onchange="processFileLoad(this)">
+
 <div class="top-container">
     <div class="header-row">
         <h1>MLGS Content Hub</h1>
         <div class="timestamp-box" id="timestamp-display">LAST SENT/SAVED: NEVER</div>
         <div class="action-bar">
-            <button class="btn btn-load" onclick="loadFromPC()">📂 Load</button>
+            <button class="btn btn-load" onclick="document.getElementById('file-loader').click()">📂 Load File</button>
             <button class="btn btn-save" onclick="saveToPC()">💾 Save to PC</button>
             <button class="btn btn-copy" onclick="copyHTML()">📋 Copy HTML</button>
         </div>
@@ -126,21 +101,55 @@
 
 <div class="workspace">
     <div class="panel">
-        <div class="toolbar">
-            <label style="margin:0; font-size: 14px;">HTML / Code View</label>
+        <div class="toolbar toolbar-code">
+            <label style="margin:0; font-size: 14px; color:#aaa;">HTML / Code View</label>
         </div>
         <textarea id="email-body" spellcheck="false" oninput="syncToVisual()"></textarea>
     </div>
     
     <div class="panel">
-        <div class="toolbar" style="background: #e9ecef;">
-            <button class="btn btn-gh" onclick="document.getElementById('gh-upload').click()">🖼️ GITHUB IMG</button>
+        <div class="toolbar">
+            <button class="fmt-btn" style="background:#6f42c1; color:white; border-color:#6f42c1;" onclick="document.getElementById('gh-upload').click()">🖼️ Upload Image</button>
             <input type="file" id="gh-upload" style="display:none" accept="image/*" onchange="uploadToGithub(this)">
+            
             <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+            
+            <select class="fmt-select" onchange="format('formatBlock', this.value)">
+                <option value="p">Normal Text</option>
+                <option value="H1">Heading 1</option>
+                <option value="H2">Heading 2</option>
+                <option value="H3">Heading 3</option>
+            </select>
+            <select class="fmt-select" onchange="format('fontSize', this.value)">
+                <option value="3">Normal Size</option>
+                <option value="4">Large</option>
+                <option value="5">X-Large</option>
+                <option value="6">XX-Large</option>
+            </select>
+
+            <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+
             <button class="fmt-btn" onclick="format('bold')"><b>B</b></button>
             <button class="fmt-btn" onclick="format('italic')"><i>I</i></button>
             <button class="fmt-btn" onclick="format('underline')"><u>U</u></button>
-            <button class="fmt-btn" onclick="insertLink()">Link</button>
+            <button class="fmt-btn" onclick="format('strikeThrough')"><strike>S</strike></button>
+
+            <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+            
+            <div class="color-picker-wrapper">
+                Text: <input type="color" id="textColor" onchange="format('foreColor', this.value)">
+            </div>
+            <div class="color-picker-wrapper">
+                Back: <input type="color" id="bgColor" value="#ffffff" onchange="format('hiliteColor', this.value)">
+            </div>
+
+            <span style="border-left: 2px solid #ccc; height: 20px; margin: 0 5px;"></span>
+
+            <button class="fmt-btn" onclick="format('justifyLeft')">Left</button>
+            <button class="fmt-btn" onclick="format('justifyCenter')">Center</button>
+            <button class="fmt-btn" onclick="format('insertUnorderedList')">• Bullet</button>
+            
+            <button class="fmt-btn" onclick="insertLink()">🔗 Link</button>
         </div>
         <div id="visual-view" contenteditable="true" oninput="syncToCode()" onkeyup="syncToCode()" onmouseup="syncToCode()"></div>
     </div>
@@ -151,62 +160,58 @@
     const visualView = document.getElementById('visual-view');
     const subjectInput = document.getElementById('email-title');
     const tsDisplay = document.getElementById('timestamp-display');
-    
     let ghToken = localStorage.getItem('gh_token') || "";
-    let fileHandle = null;
 
-    // --- INITIAL LOAD FROM BROWSER ---
+    // STARTUP LOAD
     window.onload = () => {
         const savedHTML = localStorage.getItem('mlgs_hub_html');
         const savedSub = localStorage.getItem('mlgs_hub_sub');
         const savedTime = localStorage.getItem('mlgs_hub_time');
-        
         if (savedHTML) { codeView.value = savedHTML; syncToVisual(); }
         if (savedSub) subjectInput.value = savedSub;
         if (savedTime) tsDisplay.innerText = "LAST SENT/SAVED: " + savedTime;
     };
 
-    // --- PC FILE LOAD ---
-    async function loadFromPC() {
-        try {
-            [fileHandle] = await window.showOpenFilePicker({
-                types: [{ description: 'HTML Files', accept: { 'text/html': ['.html'] } }]
-            });
-            const file = await fileHandle.getFile();
-            let content = await file.text();
-            
-            // Extract Subject if it exists in comments
+    // --- BULLETPROOF PC LOAD ---
+    function processFileLoad(input) {
+        if (!input.files[0]) return;
+        const file = input.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            let content = e.target.result;
             if (content.startsWith('\n');
                 subjectInput.value = parts[0].replace('\n');
             }
-            
             codeView.value = content;
             syncToVisual();
             alert("Loaded: " + file.name);
-        } catch (e) { console.log("Load cancelled."); }
+            input.value = ""; // Reset input so you can load the same file again if needed
+        };
+        reader.readAsText(file);
     }
 
-    // --- PC FILE SAVE & TIMESTAMP ---
-    async function saveToPC() {
-        try {
-            if (!fileHandle) {
-                fileHandle = await window.showSaveFilePicker({
-                    suggestedName: 'MLGS_Campaign.html',
-                    types: [{ description: 'HTML File', accept: { 'text/html': ['.html'] } }]
-                });
-            }
-            const writable = await fileHandle.createWritable();
-            const fullContent = `\n${codeView.value}`;
-            await writable.write(fullContent);
-            await writable.close();
+    // --- BULLETPROOF PC SAVE ---
+    function saveToPC() {
+        const fullContent = `\n${codeView.value}`;
+        const blob = new Blob([fullContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        // Use subject line for filename, or default to MLGS_Campaign
+        let fileName = subjectInput.value ? subjectInput.value.replace(/[^a-z0-9]/gi, '_') : 'MLGS_Campaign';
+        a.download = fileName + '.html';
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
 
-            // Update Time
-            const now = new Date().toLocaleString();
-            tsDisplay.innerText = "LAST SENT/SAVED: " + now;
-            localStorage.setItem('mlgs_hub_time', now);
-            
-            alert("Saved successfully to your PC!");
-        } catch (e) { console.log("Save cancelled."); }
+        // Update Time
+        const now = new Date().toLocaleString();
+        tsDisplay.innerText = "LAST SENT/SAVED: " + now;
+        localStorage.setItem('mlgs_hub_time', now);
     }
 
     // --- GITHUB IMAGE UPLOAD ---
@@ -259,8 +264,14 @@
         localStorage.setItem('mlgs_hub_sub', subjectInput.value);
     }
 
-    function format(cmd) { document.execCommand(cmd, false, null); syncToCode(); visualView.focus(); }
+    function format(cmd, value = null) { 
+        visualView.focus();
+        document.execCommand(cmd, false, value); 
+        syncToCode(); 
+    }
+
     function insertLink() { 
+        visualView.focus();
         const url = prompt("Link URL:"); 
         if(url) { document.execCommand('createLink', false, url); syncToCode(); }
     }
