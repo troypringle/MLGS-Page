@@ -12,7 +12,6 @@
             --pro-green-hover: #218838;
             --bg-page: #f4f7f9;
             --border: #ced4da;
-            /* Syntax Colors */
             --syn-tag: #0000ff;
             --syn-attr: #ff0000;
             --syn-val: #8000ff;
@@ -48,7 +47,6 @@
 
         h1 { margin: 0; color: var(--pro-blue); font-size: 28px; font-weight: 900; text-transform: uppercase; }
 
-        /* Top Notification Box */
         #top-timer-banner {
             font-size: 22px;
             font-weight: 900;
@@ -61,7 +59,6 @@
 
         .subject-row { margin-bottom: 20px; }
 
-        /* Bitwarden protection */
         #mlgs-subject-field-unique {
             width: 100%;
             padding: 15px;
@@ -98,7 +95,6 @@
             font-size: 12px;
         }
 
-        /* Editors */
         .wysiwyg-toolbar { background: #f8f9fa; border-bottom: 1px solid var(--border); padding: 8px; display: flex; gap: 5px; }
         .wysiwyg-toolbar button, .wysiwyg-toolbar select { padding: 5px 10px; font-weight: bold; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
 
@@ -118,14 +114,12 @@
         .val { color: var(--syn-val); }
         .mlgs-var { color: white; background: var(--syn-token); padding: 0 3px; border-radius: 3px; font-weight: bold; }
 
-        /* Action Buttons */
         .action-bar { display: flex; gap: 10px; margin-bottom: 25px; }
         .btn { padding: 15px; font-size: 14px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; text-align: center; text-decoration: none; transition: 0.2s; flex: 1; }
         .btn-green { background: var(--pro-green); color: white; }
         .btn-blue { background: var(--pro-blue); color: white; }
         .btn-grey { background: #6c757d; color: white; }
 
-        /* FOOTER / TIMER SECTION */
         footer {
             border-top: 3px solid var(--pro-blue);
             padding-top: 25px;
@@ -155,7 +149,6 @@
 
         .footer-buttons { display: flex; gap: 15px; }
         .btn-huge { flex: 1; padding: 25px; font-size: 24px; font-weight: 900; }
-
         .ready-text { color: var(--pro-green) !important; }
     </style>
 </head>
@@ -168,11 +161,10 @@
     </header>
 
     <div class="subject-row">
-        <input type="text" id="mlgs-subject-field-unique" placeholder="Subject Line / Email Title..." autocomplete="off" data-lpignore="true">
+        <input type="text" id="mlgs-subject-field-unique" placeholder="Subject Line / Email Title..." autocomplete="off">
     </div>
 
     <div class="workspace">
-        <!-- LEFT: VISUAL -->
         <div class="pane">
             <div class="pane-header">Visual Editor & Preview</div>
             <div class="wysiwyg-toolbar">
@@ -184,10 +176,9 @@
                 <button onclick="exec('createLink', prompt('URL:'))">Link</button>
                 <button onclick="exec('removeFormat')">Clear Style</button>
             </div>
-            <div id="visual-view" contenteditable="true" oninput="syncFromVisual()" onmouseup="syncSelectionToCode()" onkeyup="syncSelectionToCode()"></div>
+            <div id="visual-view" contenteditable="true" oninput="syncFromVisual()"></div>
         </div>
 
-        <!-- RIGHT: HTML -->
         <div class="pane">
             <div class="pane-header">HTML Source Code</div>
             <div class="code-container">
@@ -242,15 +233,13 @@
     const lastSavedDisplay = document.getElementById('last-saved-time-str');
     const topBanner = document.getElementById('top-timer-banner');
 
-    // --- NEW: LIVE PREVIEW FUNCTION ---
     function openLivePreview() {
         const content = htmlRaw.value;
         const previewWin = window.open("", "MLGSPreview", "width=800,height=800");
-        previewWin.document.write('<html><head><title>Email Preview Test</title><style>body{font-family:Arial, sans-serif; padding:20px;}</style></head><body>' + content + '</body></html>');
+        previewWin.document.write('<html><head><title>Preview</title></head><body>' + content + '</body></html>');
         previewWin.document.close();
     }
 
-    // --- SYNTAX & EDITOR CORE ---
     function applySyntax(code) {
         let escaped = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         escaped = escaped.replace(/&lt;(\/?[a-z1-6]+)(.*?)&gt;/gi, (match, tag, attrs) => {
@@ -261,61 +250,46 @@
         htmlColored.innerHTML = escaped + "\n";
     }
 
-    function syncFromCode() { applySyntax(htmlRaw.value); visualView.innerHTML = htmlRaw.value; autoSaveContent(); }
-    function syncFromVisual() { htmlRaw.value = visualView.innerHTML; applySyntax(htmlRaw.value); autoSaveContent(); }
-    function syncCodeScroll() { htmlColored.scrollTop = htmlRaw.scrollTop; }
-    function exec(cmd, val = null) { document.execCommand(cmd, false, val); syncFromVisual(); }
+    function syncFromCode() { 
+        applySyntax(htmlRaw.value); 
+        visualView.innerHTML = htmlRaw.value; 
+        autoSaveContent(); 
+    }
 
-    function syncSelectionToCode() {
-        const selection = window.getSelection();
-        const selectedText = selection.toString().trim();
-        if (selectedText.length > 2) {
-            const code = htmlRaw.value;
-            const index = code.indexOf(selectedText);
-            if (index !== -1) {
-                htmlRaw.focus();
-                htmlRaw.setSelectionRange(index, index + selectedText.length);
-                htmlRaw.scrollTop = (code.substr(0, index).split("\n").length - 5) * 22; 
-            }
-        }
+    function syncFromVisual() { 
+        htmlRaw.value = visualView.innerHTML; 
+        applySyntax(htmlRaw.value); 
+        autoSaveContent(); 
+    }
+
+    function syncCodeScroll() { 
+        htmlColored.scrollTop = htmlRaw.scrollTop; 
+    }
+
+    function exec(cmd, val = null) { 
+        document.execCommand(cmd, false, val); 
+        syncFromVisual(); 
     }
 
     // --- MAILING ACTION LOGIC ---
     function updateMailingTimer() {
         const lastSavedTimestamp = localStorage.getItem('mlgs_timestamp_ms');
-        
-        if (!lastSavedTimestamp || lastSavedTimestamp === "null") {
-            countdownDisplay.innerText = "00:00:00";
-            countdownDisplay.classList.add('ready-text');
-            topBanner.innerText = "READY TO MAIL";
-            topBanner.style.background = "#eafff0";
-            topBanner.style.color = "#28a745";
-            topBanner.style.borderColor = "#c3e6cb";
-            return;
-        }
+        if (!lastSavedTimestamp || lastSavedTimestamp === "null") return;
 
         const waitPeriod = 23 * 60 * 60 * 1000; 
         const nextMailTime = parseInt(lastSavedTimestamp) + waitPeriod;
-        const now = Date.now();
-        const diff = nextMailTime - now;
+        const diff = nextMailTime - Date.now();
 
         if (diff <= 0) {
             countdownDisplay.innerText = "00:00:00";
-            countdownDisplay.classList.add('ready-text');
             topBanner.innerText = "READY TO MAIL";
             topBanner.style.background = "#eafff0";
-            topBanner.style.color = "#28a745";
-            topBanner.style.borderColor = "#c3e6cb";
         } else {
-            countdownDisplay.classList.remove('ready-text');
             const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
             const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
             const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
             countdownDisplay.innerText = `${h}:${m}:${s}`;
             topBanner.innerText = `NEXT MAIL IN: ${h}:${m}:${s}`;
-            topBanner.style.background = "#fff5f5";
-            topBanner.style.color = "#d9534f";
-            topBanner.style.borderColor = "#f5c6cb";
         }
     }
 
@@ -325,17 +299,14 @@
         const dateString = new Date(ms).toLocaleString();
         localStorage.setItem('mlgs_last_timestamp_str', dateString);
         lastSavedDisplay.innerText = dateString;
-        updateMailingTimer();
     }
 
     function applyManualTime() {
         const inputVal = document.getElementById('manual-time-input').value;
-        if (!inputVal) return alert("Select a date and time first!");
-        const manualMs = new Date(inputVal).getTime();
-        triggerMailingAction(manualMs);
+        if (!inputVal) return;
+        triggerMailingAction(new Date(inputVal).getTime());
     }
 
-    // --- PERSISTENCE ---
     function autoSaveContent() {
         localStorage.setItem('mlgs_session_content', JSON.stringify({ 
             title: titleInput.value, 
@@ -345,7 +316,6 @@
 
     function downloadHTML() {
         const userTitle = titleInput.value.trim() || 'mlgs-email';
-        localStorage.setItem('mlgs_checkpoint', JSON.stringify({ title: userTitle, content: htmlRaw.value }));
         const blob = new Blob([htmlRaw.value], { type: 'text/html' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -367,10 +337,8 @@
     function copyHTML() {
         htmlRaw.select();
         document.execCommand('copy');
-        alert("HTML Source Copied!");
     }
 
-    // --- INITIALIZATION ---
     window.onload = () => {
         const session = localStorage.getItem('mlgs_session_content');
         if (session) {
@@ -379,19 +347,14 @@
             htmlRaw.value = data.content || "";
             syncFromCode();
         }
-        const lastStr = localStorage.getItem('mlgs_last_timestamp_str');
-        if (lastStr) lastSavedDisplay.innerText = lastStr;
         setInterval(updateMailingTimer, 1000);
-        updateMailingTimer();
     };
 
-    titleInput.addEventListener('input', autoSaveContent);
     fileInput.onchange = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onload = (event) => {
             htmlRaw.value = event.target.result;
-            titleInput.value = file.name.replace('.html', '');
             syncFromCode();
         };
         reader.readAsText(file);
