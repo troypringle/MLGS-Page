@@ -1,440 +1,379 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLGS Content Hub - Professional Edition</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Email Swipe Machine</title>
+    <script src="https://js.puter.com/v2/"></script>
     <style>
         :root {
-            --pro-blue: #0056b3;
-            --pro-blue-hover: #004494;
-            --pro-green: #28a745;
-            --pro-green-hover: #218838;
-            --bg-page: #f4f7f9;
-            --border: #ced4da;
-            --syn-tag: #0000ff;
-            --syn-attr: #ff0000;
-            --syn-val: #8000ff;
-            --syn-token: #d63384;
+            --bg: #d4c4a8; --panel: #f5f0e6; --panel2: #efe6d8; --border: #c9b896;
+            --muted: #5c4d3a; --gold: #b8860b; --green: #2e7d32; --blue: #1976d2; --red: #d32f2f;
+            --shadow: 0 4px 0px rgba(0,0,0,0.2);
+            --btn-h: 40px;
         }
-
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: var(--bg-page);
-            margin: 0;
-            padding: 25px; 
-            color: #333;
+        body.theme-slate {
+            --bg: #111827; --panel: #1f2937; --panel2: #243244; --border: #374151;
+            --muted: #cbd5e1; --gold: #fbbf24; --green: #22c55e; --red: #ef4444;
         }
-
-        .main-hub {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            border: 1px solid #ddd;
+        * { box-sizing: border-box; font-size: 16px; }
+        body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: #111; line-height: 1.6; }
+        
+        .topbar { background: var(--panel); border-bottom: 3px solid var(--gold); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .grid { display: grid; grid-template-columns: 240px 1fr 1fr; gap: 16px; padding: 16px; transition: all 0.3s ease; }
+        .grid.sidebar-closed { grid-template-columns: 60px 1fr 1fr; }
+        
+        .card { background: var(--panel); border: 2px solid var(--border); border-radius: 10px; padding: 16px; position: relative; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        
+        .sidebar-content { transition: opacity 0.2s; }
+        .sidebar-closed .sidebar-content { opacity: 0; visibility: hidden; height: 0; overflow: hidden; }
+        
+        /* HIGHLY RESPONSIVE BUTTONS */
+        .btn { 
+            border: 2px solid rgba(0,0,0,0.1); background: var(--panel2); color: #111; 
+            height: var(--btn-h); padding: 0 15px; border-radius: 8px; cursor: pointer; 
+            font-weight: 800; display: inline-flex; align-items: center; justify-content: center;
+            white-space: nowrap; transition: all 0.1s ease;
+            box-shadow: var(--shadow);
+            position: relative;
+            top: 0;
         }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 4px solid var(--pro-blue);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+        .btn:hover { 
+            filter: brightness(1.05); 
+            top: -2px;
+            box-shadow: 0 6px 0px rgba(0,0,0,0.15);
         }
-
-        h1 { margin: 0; color: var(--pro-blue); font-size: 28px; font-weight: 900; text-transform: uppercase; }
-
-        #top-timer-banner {
-            font-size: 22px;
-            font-weight: 900;
-            padding: 10px 20px;
-            border-radius: 6px;
-            background: #eafff0;
-            color: #28a745;
-            border: 2px solid #c3e6cb;
+        .btn:active { 
+            top: 3px;
+            box-shadow: 0 1px 0px rgba(0,0,0,0.1);
+            transform: scale(0.98);
         }
+        
+        .btnGreen { background: var(--green); color: #fff; }
+        .btnBlue { background: var(--blue); color: #fff; }
+        .btnRed { background: var(--red); color: #fff; }
+        .btnIcon { padding: 0 10px; font-size: 18px; }
+        .btnSmall { height: 32px; font-size: 13px; }
 
-        .subject-row { margin-bottom: 20px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 12px; background: #fff; }
+        .toolbar { display: flex; gap: 6px; background: var(--panel2); padding: 8px; border: 2px solid var(--border); border-bottom: 0; border-radius: 8px 8px 0 0; }
+        
+        #bodyEditor, #sourceEditor { width: 100%; max-width: 600px; min-height: 450px; background: #fff; border: 2px solid var(--border); padding: 15px; outline: none; margin: 0 auto; overflow-y: auto; }
+        #sourceEditor { display: none; font-family: monospace; }
 
-        #mlgs-subject-field-unique {
-            width: 100%;
-            padding: 15px;
-            font-size: 20px;
-            font-weight: bold;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            background: #fdfdfd;
-        }
-
-        .workspace {
-            display: flex;
-            gap: 20px;
-            height: 600px;
-            margin-bottom: 20px;
-        }
-
-        .pane {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            overflow: hidden;
-            background: white;
-        }
-
-        .pane-header {
-            background: var(--pro-blue);
-            color: white;
-            padding: 10px 15px;
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
-
-        .wysiwyg-toolbar { background: #f8f9fa; border-bottom: 1px solid var(--border); padding: 8px; display: flex; gap: 5px; }
-        .wysiwyg-toolbar button, .wysiwyg-toolbar select { padding: 5px 10px; font-weight: bold; cursor: pointer; border: 1px solid #ccc; border-radius: 4px; }
-
-        #visual-view { flex: 1; padding: 20px; overflow-y: auto; outline: none; background: white; font-size: 16px; }
-
-        .code-container { position: relative; flex: 1; overflow: hidden; }
-        #html-raw, #html-colored {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            margin: 0; padding: 20px; font-family: 'Consolas', monospace; font-size: 14px;
-            line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; box-sizing: border-box; border: none; overflow-y: auto;
-        }
-        #html-raw { color: transparent; background: transparent; caret-color: black; z-index: 2; outline: none; resize: none;}
-        #html-colored { z-index: 1; color: #333; pointer-events: none; }
-
-        .tag { color: var(--syn-tag); font-weight: bold; }
-        .attr { color: var(--syn-attr); }
-        .val { color: var(--syn-val); }
-        .mlgs-var { color: white; background: var(--syn-token); padding: 0 3px; border-radius: 3px; font-weight: bold; }
-
-        .action-bar { display: flex; gap: 10px; margin-bottom: 25px; }
-        .btn { padding: 15px; font-size: 14px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; text-transform: uppercase; text-align: center; text-decoration: none; transition: 0.2s; flex: 1; }
-        .btn-green { background: var(--pro-green); color: white; }
-        .btn-blue { background: var(--pro-blue); color: white; }
-        .btn-grey { background: #6c757d; color: white; }
-
-        footer {
-            border-top: 3px solid var(--pro-blue);
-            padding-top: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .timer-grid {
-            display: grid;
-            grid-template-columns: 1.5fr 1.2fr 1fr;
-            gap: 20px;
-            align-items: center;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #ddd;
-        }
-
-        .timer-display-box { text-align: center; border-right: 2px solid #eee; }
-        .timer-val { font-size: 32px; font-weight: 900; color: #d9534f; display: block; }
-        .timer-label { font-size: 12px; font-weight: bold; color: #777; text-transform: uppercase; }
-
-        .manual-override-box { display: flex; flex-direction: column; gap: 8px; }
-        .manual-override-box label { font-size: 12px; font-weight: bold; color: var(--pro-blue); }
-        .manual-override-box input { padding: 10px; border: 1px solid var(--border); border-radius: 5px; font-weight: bold; }
-
-        .footer-buttons { display: flex; gap: 15px; }
-        .btn-huge { flex: 1; padding: 25px; font-size: 24px; font-weight: 900; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; z-index: 10000; align-items: center; justify-content: center; padding: 20px; }
+        .modal.show { display: flex; }
+        .modalInner { background: var(--panel); border: 4px solid var(--gold); border-radius: 12px; padding: 25px; width: 100%; max-width: 500px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        
+        .tag-row { display: flex; gap: 6px; margin-bottom: 12px; }
+        .preview-body-frame { background: #fff; border: 2px solid var(--border); padding: 25px; min-height: 450px; max-width: 600px; margin: 0 auto; }
+        .preview-subject-box { background: #fff; border: 2px solid var(--border); padding: 12px; border-radius: 8px; margin-bottom: 20px; min-height: 50px; }
     </style>
 </head>
 <body>
 
-<div class="main-hub">
-    <header>
-        <h1>MLGS Content Hub</h1>
-        <div id="top-timer-banner">READY TO MAIL</div>
-    </header>
+<div id="toast" style="position:fixed; bottom:20px; right:20px; background:#333; color:#fff; padding:12px 24px; display:none; border-radius:8px; z-index:99999; font-weight:bold;"></div>
 
-    <div class="subject-row">
-        <input type="text" id="mlgs-subject-field-unique" placeholder="Subject Line / Email Title..." autocomplete="off">
+<div class="modal" id="settingsModal"><div class="modalInner">
+    <h2 style="color:var(--gold); margin-top:0;">UI Settings</h2>
+    <button class="btn btnBlue" style="width:100%;" onclick="document.body.classList.toggle('theme-slate')">Toggle Dark/Light Mode</button>
+    <button class="btn" style="width:100%; margin-top:15px;" onclick="$('settingsModal').classList.remove('show')">Close</button>
+</div></div>
+
+<div class="modal" id="apiModal"><div class="modalInner">
+    <h2 style="color:var(--gold); margin-top:0;">API Keys</h2>
+    <label style="font-size:11px; font-weight:800;">GROQ KEY</label>
+    <input id="apiKey" type="password" placeholder="Groq Key...">
+    <label style="font-size:11px; font-weight:800;">HUGGING FACE TOKEN</label>
+    <input id="hfKey" type="password" placeholder="HF Token...">
+    <button class="btn btnGreen" style="width:100%" onclick="saveKeys()">Save Keys</button>
+    <button class="btn" style="width:100%; margin-top:10px;" onclick="$('apiModal').classList.remove('show')">Cancel</button>
+</div></div>
+
+<div class="modal" id="errorModal"><div class="modalInner">
+    <h2 style="color:var(--red); margin-top:0;">🐞 Debug Log</h2>
+    <div id="apiErrorLog" style="font-size:12px; background:#fff; border:2px solid var(--border); padding:12px; min-height:150px; margin-bottom:15px; color:#d32f2f; white-space:pre-wrap; overflow-y:auto; max-height:300px; font-family:monospace;">No errors recorded.</div>
+    <button class="btn btnBlue" style="width:100%" onclick="$('errorModal').classList.remove('show')">Close Log</button>
+</div></div>
+
+<div class="modal" id="promptModal"><div class="modalInner">
+    <h2 id="promptTitle" style="color:var(--gold); margin-top:0;">Edit Prompt</h2>
+    <textarea id="promptArea" style="min-height:200px;"></textarea>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn btnGreen" style="flex:1" onclick="closePrompt(true)">Save Changes</button>
+        <button class="btn btnRed" style="flex:1" onclick="closePrompt(false)">Cancel</button>
     </div>
+</div></div>
 
-    <div class="workspace">
-        <div class="pane">
-            <div class="pane-header">Visual Editor & Preview</div>
-            <div class="wysiwyg-toolbar">
-                <button onclick="exec('bold')">B</button>
-                <button onclick="exec('italic')">I</button>
-                <button onclick="exec('underline')">U</button>
-                <select onchange="exec('fontSize', this.value); this.selectedIndex=0;"><option value="">Size</option><option value="3">Small</option><option value="4">Normal</option><option value="5">Large</option><option value="7">Huge</option></select>
-                <input type="color" oninput="exec('foreColor', this.value)" title="Color">
-                <button onclick="exec('createLink', prompt('URL:'))">Link</button>
-                <button onclick="exec('removeFormat')">Clear Style</button>
-            </div>
-            <div id="visual-view" contenteditable="true" oninput="syncFromVisual()"></div>
-        </div>
-
-        <div class="pane">
-            <div class="pane-header">HTML Source Code</div>
-            <div class="code-container">
-                <div id="html-colored"></div>
-                <textarea id="html-raw" spellcheck="false" oninput="syncFromCode()" onscroll="syncCodeScroll()"></textarea>
-            </div>
-        </div>
+<div class="topbar">
+    <div style="font-weight:900; color:var(--gold); font-size:24px; text-shadow: 1px 1px 0px rgba(0,0,0,0.1);">Email Swipe Machine</div>
+    <div style="display:flex; gap:12px;">
+        <button class="btn btnRed btnSmall" onclick="$('errorModal').classList.add('show')">🐞 Debug</button>
+        <button class="btn btnSmall" onclick="$('apiModal').classList.add('show')">🔑 API Keys</button>
+        <button class="btn btnSmall" onclick="$('settingsModal').classList.add('show')">⚙️ Settings</button>
+        <button class="btn btnBlue btnSmall" onclick="toggleSource()" id="srcBtn">HTML Source</button>
     </div>
+</div>
 
-    <div class="action-bar">
-        <button class="btn btn-green" onclick="downloadHTML()">Save & Download</button>
-        <button class="btn btn-blue" onclick="openLivePreview()">Live Preview Test</button>
-        <button class="btn btn-blue" onclick="restoreCheckpoint()">Restore Last Download</button>
-        <button class="btn btn-grey" onclick="document.getElementById('file-input').click()">Browse PC Files</button>
-        <button class="btn btn-grey" onclick="copyHTML()">Copy HTML Source</button>
-    </div>
-    <input type="file" id="file-input" style="display:none" accept=".html">
-
-    <footer>
-        <div class="timer-grid">
-            <div class="timer-display-box">
-                <span class="timer-label">Next Mailing Available In:</span>
-                <span id="countdown-timer" class="timer-val">00:00:00</span>
-            </div>
+<div class="grid" id="mainGrid">
+    <div class="card" style="padding: 10px;">
+        <button class="btn btnSmall btnBlue" style="width:100%; margin-bottom:15px;" onclick="toggleSidebar()" id="tglBtn">HIDE SIDEBAR</button>
+        <div class="sidebar-content">
+            <label style="font-weight:800; font-size:12px; color:var(--muted)">OFFER NAME</label>
+            <input id="offerName" type="text" oninput="autoSave()">
             
-            <div class="timer-display-box">
-                <span class="timer-label">Last Mailing Recorded:</span>
-                <span id="last-saved-time-str" style="font-weight: bold; font-size: 14px; margin-top: 10px; display: block; color: #555;">NEVER RECORDED</span>
-            </div>
+            <label style="font-weight:800; font-size:12px; color:var(--muted)">BENEFITS (one per line)</label>
+            <textarea id="benefits" style="min-height:100px;" oninput="autoSave()"></textarea>
+            
+            <label style="font-weight:800; font-size:12px; color:var(--muted)">CTA TEXT</label>
+            <input id="ctaText" value="Click here to see it" oninput="autoSave()">
 
-            <div class="manual-override-box">
-                <label>Manual Time Override:</label>
-                <input type="datetime-local" id="manual-time-input">
-                <button class="btn btn-blue" style="padding: 5px; font-size: 11px;" onclick="applyManualTime()">Set Custom Action Time</button>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-top:15px;">
+                <button class="btn btnBlue" onclick="openPrompt('title')">Edit Title Prompt 📝</button>
+                <button class="btn btnBlue" onclick="openPrompt('body')">Edit Body Prompt 📝</button>
+                <button class="btn btnBlue" onclick="openPrompt('image')">Edit Image Prompt 📝</button>
             </div>
         </div>
+    </div>
 
-        <div class="footer-buttons">
-            <a href="https://www.myleadgensecret.com/index.php" target="_blank" class="btn btn-green btn-huge">OPEN MLGS LOGIN</a>
-            <button class="btn btn-blue btn-huge" onclick="triggerMailingAction()">UPDATE TIME / DATE NOW</button>
+    <div class="card">
+        <div class="tag-row">
+            <button class="btn btnSmall" onclick="insertAtCaret('subject','{!firstname_fix}')">{!firstname_fix}</button>
+            <button class="btn btnSmall" onclick="insertAtCaret('subject','{!lastname_fix}')">{!lastname_fix}</button>
+            <button class="btn btnSmall" onclick="insertAtCaret('subject','⭐')">⭐</button>
+            <div style="flex:1"></div>
+            <select id="modelSelect" style="width:180px; margin:0; font-size:12px; font-weight:800;" onchange="autoSave()">
+                <option value="llama-3.3-70b-versatile">Llama 3.3 70B (Groq)</option>
+                <option value="puter-gemini">Gemini (Puter - No Key)</option>
+                <option value="hf-mistral">Mistral 7B (HuggingFace)</option>
+                <option value="llama-3.1-8b-instant">Llama 3.1 8B (Groq)</option>
+            </select>
         </div>
-    </footer>
+        
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <input id="subject" type="text" placeholder="Enter Subject Line..." style="margin:0; flex:1; font-weight:bold;" oninput="update(); autoSave();">
+            <button class="btn btnGreen" onclick="generateTitle()">Generate</button>
+        </div>
+
+        <div class="toolbar">
+            <button class="btn btnIcon btnSmall" onclick="exec('bold')"><b>B</b></button>
+            <button class="btn btnIcon btnSmall" onclick="exec('italic')"><i>I</i></button>
+            <button class="btn btnIcon btnSmall" onclick="exec('foreColor','#d32f2f')" style="color:#d32f2f">A</button>
+            <button class="btn btnIcon btnSmall" onclick="exec('foreColor','#111111')">A</button>
+            <button class="btn btnSmall" onclick="exec('createLink', prompt('Link URL:'))">Link</button>
+            <button class="btn btnSmall" onclick="insertImg()">Image</button>
+            <div style="flex:1"></div>
+            <button class="btn btnSmall" onclick="exec('undo')">Undo</button>
+        </div>
+        <div id="bodyEditor" contenteditable="true" oninput="update(); autoSave();"></div>
+        <textarea id="sourceEditor"></textarea>
+
+        <div style="margin-top:15px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <button class="btn btnGreen" onclick="generateBody()" style="flex:2">Generate Email Body</button>
+            <select id="sigSelect" style="width:140px; margin:0;"><option value="">Signatures</option></select>
+            <button class="btn btnGreen" onclick="insertSig()">Insert</button>
+            <button class="btn btnRed" onclick="clearBody()">Clear</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="preview-subject-box">
+            <label style="font-weight:800; font-size:10px; color:var(--muted); display:block; margin-bottom:4px;">SUBJECT PREVIEW</label>
+            <span id="prevSub" style="font-weight:800; color:var(--blue);"></span>
+        </div>
+        
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <button class="btn btnBlue" style="flex:1" onclick="copyText($('subject').value)">Copy Title</button>
+            <button class="btn btnBlue" style="flex:1" onclick="copyText(getWrappedBody())">Copy HTML</button>
+        </div>
+
+        <div class="preview-body-frame" id="prevBody"></div>
+        
+        <div style="margin-top:15px;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:800; font-size:13px; margin-bottom:15px;">
+                <input type="checkbox" id="useWrapper" checked style="width:auto; margin:0; transform: scale(1.2);" onchange="update()"> Use 600px Wrapper
+            </label>
+            <button class="btn btnGreen" onclick="copyAll()" style="width:100%; height:70px; font-size:22px;">COPY FULL SWIPE</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    const visualView = document.getElementById('visual-view');
-    const htmlRaw = document.getElementById('html-raw');
-    const htmlColored = document.getElementById('html-colored');
-    const titleInput = document.getElementById('mlgs-subject-field-unique');
-    const fileInput = document.getElementById('file-input');
-    const countdownDisplay = document.getElementById('countdown-timer');
-    const lastSavedDisplay = document.getElementById('last-saved-time-str');
-    const topBanner = document.getElementById('top-timer-banner');
-    const manualTimeInput = document.getElementById('manual-time-input');
-
-    // --- UNDO/REDO SYSTEM ---
-    let historyStack = [];
-    let redoStack = [];
-    const maxHistory = 50;
-
-    function saveState() {
-        const currentState = {
-            title: titleInput.value,
-            content: htmlRaw.value
-        };
-        if (historyStack.length === 0 || JSON.stringify(currentState) !== JSON.stringify(historyStack[historyStack.length - 1])) {
-            historyStack.push(currentState);
-            if (historyStack.length > maxHistory) historyStack.shift();
-            redoStack = []; 
-        }
-    }
-
-    function undo() {
-        if (historyStack.length > 1) {
-            redoStack.push(historyStack.pop());
-            const previousState = historyStack[historyStack.length - 1];
-            applyState(previousState);
-        }
-    }
-
-    function redo() {
-        if (redoStack.length > 0) {
-            const nextState = redoStack.pop();
-            historyStack.push(nextState);
-            applyState(nextState);
-        }
-    }
-
-    function applyState(state) {
-        titleInput.value = state.title;
-        htmlRaw.value = state.content;
-        visualView.innerHTML = state.content;
-        applySyntax(state.content);
-        autoSaveContent();
-    }
-
-    window.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key.toLowerCase() === 'z') {
-            e.preventDefault();
-            undo();
-        }
-        if (e.ctrlKey && e.key.toLowerCase() === 'y') {
-            e.preventDefault();
-            redo();
-        }
-    });
-
-    // --- CORE EDITOR FUNCTIONS ---
-    function applySyntax(code) {
-        let escaped = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        escaped = escaped.replace(/&lt;(\/?[a-z1-6]+)(.*?)&gt;/gi, (match, tag, attrs) => {
-            let highlightedAttrs = attrs.replace(/([a-z-]+)=(['"].*?['"])/gi, '<span class="attr">$1</span>=<span class="val">$2</span>');
-            return `<span class="tag">&lt;${tag}</span>${highlightedAttrs}<span class="tag">&gt;</span>`;
-        });
-        escaped = escaped.replace(/\{!(.*?)\}/g, '<span class="mlgs-var">{!$1}</span>');
-        htmlColored.innerHTML = escaped + "\n";
-    }
-
-    let saveTimer;
-    function syncFromCode() { 
-        applySyntax(htmlRaw.value); 
-        visualView.innerHTML = htmlRaw.value; 
-        autoSaveContent(); 
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(saveState, 500);
-    }
-
-    function syncFromVisual() { 
-        htmlRaw.value = visualView.innerHTML; 
-        applySyntax(htmlRaw.value); 
-        autoSaveContent(); 
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(saveState, 500);
-    }
-
-    function syncCodeScroll() { htmlColored.scrollTop = htmlRaw.scrollTop; }
+    const $ = id => document.getElementById(id);
+    let activePrompt = "";
     
-    function exec(cmd, val = null) { 
-        saveState();
-        document.execCommand(cmd, false, val); 
-        syncFromVisual(); 
+    // PERSISTENT PROMPTS
+    let prompts = JSON.parse(localStorage.getItem("esm_prompts")) || {
+        title: "Return ONLY one string.",
+        body: "Write 2 short paragraphs.",
+        image: "Describe a high-converting image for this offer."
+    };
+
+    function showToast(m) { const t=$("toast"); t.textContent=m; t.style.display="block"; setTimeout(()=>t.style.display="none",2500); }
+    
+    function toggleSidebar() { 
+        $("mainGrid").classList.toggle("sidebar-closed"); 
+        $("tglBtn").textContent = $("mainGrid").classList.contains("sidebar-closed") ? "SHOW SIDEBAR" : "HIDE SIDEBAR";
     }
 
-    // --- SAVE, DOWNLOAD & FILE FUNCTIONS ---
-    function downloadHTML() {
-        const content = htmlRaw.value;
-        const title = titleInput.value || "Untitled_Email";
-        const blob = new Blob([content], { type: "text/html" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `${title.replace(/\s+/g, '_')}.html`;
-        a.click();
+    function saveKeys() {
+        localStorage.setItem("esm_key", $("apiKey").value);
+        localStorage.setItem("esm_hf_key", $("hfKey").value);
+        $("apiModal").classList.remove("show");
+        showToast("Keys Saved Successfully");
+    }
+
+    async function callAI(p) {
+        const groqKey = localStorage.getItem("esm_key");
+        const hfKey = localStorage.getItem("esm_hf_key");
+        const selectedModel = $("modelSelect").value;
+        const errorLog = $("apiErrorLog");
         
-        // Save checkpoint
-        localStorage.setItem('mlgs_checkpoint', JSON.stringify({ title: title, content: content }));
-        alert("File Downloaded & Checkpoint Saved!");
-    }
+        try {
+            if (selectedModel === "puter-gemini") {
+                const response = await puter.ai.chat(p);
+                return response.toString();
+            }
+            
+            if (selectedModel === "hf-mistral") {
+                if(!hfKey) throw new Error("Missing HF Token in API Settings");
+                const res = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3", {
+                    method: "POST", headers: { "Authorization": `Bearer ${hfKey}`, "Content-Type": "application/json" },
+                    body: JSON.stringify({ inputs: p })
+                });
+                const d = await res.json();
+                if (d.error) throw new Error(d.error);
+                return d[0].generated_text.replace(p, "").trim();
+            }
 
-    function restoreCheckpoint() {
-        const saved = localStorage.getItem('mlgs_checkpoint');
-        if (saved) {
-            saveState();
-            const data = JSON.parse(saved);
-            titleInput.value = data.title;
-            htmlRaw.value = data.content;
-            syncFromCode();
-            alert("Last download restored.");
-        } else {
-            alert("No checkpoint found.");
+            if(!groqKey) throw new Error("Missing Groq API Key in API Settings");
+            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                method:"POST", headers:{"Authorization":`Bearer ${groqKey}`,"Content-Type":"application/json"},
+                body: JSON.stringify({model:selectedModel, messages:[{role:"user",content:p}]})
+            });
+            const d = await res.json();
+            if (!res.ok) throw new Error(d.error ? d.error.message : "API Error");
+            return d.choices[0].message.content.trim();
+
+        } catch(e) { 
+            errorLog.textContent = `[${new Date().toLocaleTimeString()}] ${e.message}\n\n`;
+            showToast("AI Failed - Check Debug Log");
+            return null; 
         }
     }
 
-    function copyHTML() {
-        navigator.clipboard.writeText(htmlRaw.value);
-        alert("HTML Source Copied to Clipboard!");
+    function openPrompt(type) {
+        activePrompt = type;
+        $("promptTitle").textContent = `Editing ${type.toUpperCase()} Prompt`;
+        $("promptArea").value = prompts[type];
+        $("promptModal").classList.add("show");
+    }
+    
+    function closePrompt(save) {
+        if(save) {
+            prompts[activePrompt] = $("promptArea").value;
+            localStorage.setItem("esm_prompts", JSON.stringify(prompts));
+            showToast("Prompt Saved to Browser Memory");
+        }
+        $("promptModal").classList.remove("show");
     }
 
-    function openLivePreview() {
-        const content = htmlRaw.value;
-        const previewWin = window.open("", "MLGSPreview", "width=800,height=800");
-        previewWin.document.write('<html><head><title>Preview</title></head><body>' + content + '</body></html>');
-        previewWin.document.close();
+    function insertAtCaret(id, text) {
+        const el = $(id);
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+        el.value = el.value.substring(0, start) + text + el.value.substring(end);
+        el.focus();
+        el.selectionStart = el.selectionEnd = start + text.length;
+        update();
     }
 
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            saveState();
-            htmlRaw.value = e.target.result;
-            titleInput.value = file.name.replace('.html', '');
-            syncFromCode();
+    function exec(c, v=null) { 
+        $("bodyEditor").focus();
+        document.execCommand(c, false, v); 
+        update(); 
+    }
+    
+    function insertImg() {
+        const url = prompt("Image URL:");
+        if(!url) return;
+        const link = prompt("Link URL (optional):");
+        const html = link ? `<a href="${link}" target="_blank"><img src="${url}" style="max-width:100%;"></a>` : `<img src="${url}" style="max-width:100%;">`;
+        exec('insertHTML', html);
+    }
+    
+    function toggleSource() {
+        const isSrc = $("sourceEditor").style.display === "block";
+        if(isSrc) {
+            $("bodyEditor").innerHTML = $("sourceEditor").value;
+            $("sourceEditor").style.display = "none";
+            $("bodyEditor").style.display = "block";
+            $("srcBtn").textContent = "HTML Source";
+        } else {
+            $("sourceEditor").value = $("bodyEditor").innerHTML;
+            $("bodyEditor").style.display = "none";
+            $("sourceEditor").style.display = "block";
+            $("srcBtn").textContent = "Visual Editor";
+        }
+    }
+
+    async function generateTitle() {
+        const p = prompts.title + `\nOffer: ${$("offerName").value}\nBenefits: ${$("benefits").value}`;
+        const res = await callAI(p);
+        if(res) { $("subject").value = res.replace(/"/g,''); update(); autoSave(); }
+    }
+
+    async function generateBody() {
+        const p = prompts.body + `\nOffer: ${$("offerName").value}\nBenefits: ${$("benefits").value}\nCTA: ${$("ctaText").value}`;
+        const res = await callAI(p);
+        if(res) { exec('insertHTML', res.replace(/\n/g,"<br>")); autoSave(); }
+    }
+
+    function update() {
+        $("prevSub").textContent = $("subject").value;
+        $("prevBody").innerHTML = $("bodyEditor").innerHTML;
+    }
+
+    function getWrappedBody() {
+        const content = $("bodyEditor").innerHTML;
+        if(!$("useWrapper").checked) return content;
+        return `<table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:600px; margin:0 auto;"><tr><td style="font-family:Arial, sans-serif; font-size:16px; line-height:1.6; color:#111111;">${content}</td></tr></table>`;
+    }
+
+    function autoSave() {
+        const data = {
+            sub: $("subject").value,
+            body: $("bodyEditor").innerHTML,
+            offer: $("offerName").value,
+            benefits: $("benefits").value,
+            cta: $("ctaText").value,
+            model: $("modelSelect").value
         };
-        reader.readAsText(file);
-    });
+        localStorage.setItem("esm_draft", JSON.stringify(data));
+    }
 
-    // --- TIMER & MAILING ---
-    function updateMailingTimer() {
-        const lastSavedTimestamp = localStorage.getItem('mlgs_timestamp_ms');
-        if (!lastSavedTimestamp || lastSavedTimestamp === "null") return;
-        const waitPeriod = 23 * 60 * 60 * 1000; 
-        const nextMailTime = parseInt(lastSavedTimestamp) + waitPeriod;
-        const diff = nextMailTime - Date.now();
-        if (diff <= 0) {
-            countdownDisplay.innerText = "00:00:00";
-            topBanner.innerText = "READY TO MAIL";
-            topBanner.style.background = "#eafff0";
-            topBanner.style.color = "#28a745";
-        } else {
-            const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-            const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-            const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-            countdownDisplay.innerText = `${h}:${m}:${s}`;
-            topBanner.innerText = `NEXT MAIL IN: ${h}:${m}:${s}`;
-            topBanner.style.background = "#fff4f4";
-            topBanner.style.color = "#d9534f";
+    function loadDraft() {
+        const d = JSON.parse(localStorage.getItem("esm_draft"));
+        if(d) {
+            $("subject").value = d.sub || "";
+            $("bodyEditor").innerHTML = d.body || "";
+            $("offerName").value = d.offer || "";
+            $("benefits").value = d.benefits || "";
+            $("ctaText").value = d.cta || "";
+            if(d.model) $("modelSelect").value = d.model;
+            update();
         }
     }
 
-    function triggerMailingAction(customMs = null) {
-        const ms = customMs || Date.now();
-        localStorage.setItem('mlgs_timestamp_ms', ms);
-        const dateString = new Date(ms).toLocaleString();
-        localStorage.setItem('mlgs_last_timestamp_str', dateString);
-        lastSavedDisplay.innerText = dateString;
-    }
-
-    function applyManualTime() {
-        const val = manualTimeInput.value;
-        if (!val) return alert("Select a date/time first.");
-        const customMs = new Date(val).getTime();
-        triggerMailingAction(customMs);
-        alert("Mailing time updated!");
-    }
-
-    function autoSaveContent() {
-        localStorage.setItem('mlgs_session_content', JSON.stringify({ 
-            title: titleInput.value, 
-            content: htmlRaw.value 
-        }));
-    }
+    function clearBody() { if(confirm("This will wipe your current work. Proceed?")) { $("bodyEditor").innerHTML = ""; $("subject").value = ""; update(); autoSave(); } }
+    function copyText(t) { navigator.clipboard.writeText(t); showToast("Copied to Clipboard!"); }
+    function copyAll() { copyText(`${$("subject").value}\n\n${getWrappedBody()}`); }
 
     window.onload = () => {
-        const session = localStorage.getItem('mlgs_session_content');
-        if (session) {
-            const data = JSON.parse(session);
-            titleInput.value = data.title || "";
-            htmlRaw.value = data.content || "";
-            syncFromCode();
-            saveState(); 
-        }
-        const lastStr = localStorage.getItem('mlgs_last_timestamp_str');
-        if (lastStr) lastSavedDisplay.innerText = lastStr;
-        setInterval(updateMailingTimer, 1000);
+        $("apiKey").value = localStorage.getItem("esm_key") || "";
+        $("hfKey").value = localStorage.getItem("esm_hf_key") || "";
+        loadDraft();
     };
 </script>
-
 </body>
 </html>
